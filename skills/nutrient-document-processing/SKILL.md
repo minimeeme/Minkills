@@ -1,6 +1,6 @@
 ---
 name: nutrient-document-processing
-description: Process, convert, OCR, extract, redact, sign, and fill documents using the Nutrient DWS API. Works with PDFs, DOCX, XLSX, PPTX, HTML, and images.
+description: "Nutrient DWS API로 문서를 처리, 변환, OCR, 추출, 편집(redact), 서명, 양식 채우기. PDF, DOCX, XLSX, PPTX, HTML, 이미지 지원."
 origin: ECC
 ---
 

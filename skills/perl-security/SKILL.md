@@ -1,6 +1,6 @@
 ---
 name: perl-security
-description: Comprehensive Perl security covering taint mode, input validation, safe process execution, DBI parameterized queries, web security (XSS/SQLi/CSRF), and perlcritic security policies.
+description: "taint mode, 입력 검증, 안전한 프로세스 실행, DBI parameterized query, 웹 보안(XSS/SQLi/CSRF), perlcritic 보안 정책을 아우르는 포괄적 Perl 보안."
 origin: ECC
 ---
 

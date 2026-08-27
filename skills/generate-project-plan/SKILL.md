@@ -1,6 +1,6 @@
 ---
 name: generate-project-plan
-description: "Generate a FigJam project plan board from a PRD plus codebase context. Interactive flow: research → propose sections → per-section deep research → per-section content + block-shape proposal → create FigJam → skeleton → fill → diagrams → wrap. Each content block (section, nested section, intro callout, table, multi-column text, sticky column, diagram section, metadata strip) has its own subskill reference file. Use when the user asks for 'project plan in FigJam', 'interactive project plan', '/generate-project-plan', or provides a PRD and wants per-section confirmation on content + rendering."
+description: "PRD와 코드베이스 컨텍스트로부터 FigJam 프로젝트 계획 보드를 생성. 대화형 흐름: 리서치 → 섹션 제안 → 섹션별 심층 리서치 → 섹션별 콘텐츠 + 블록 형태 제안 → FigJam 생성 → 스켈레톤 → 채우기 → 다이어그램 → 마무리. 각 콘텐츠 블록(섹션, 중첩 섹션, intro callout, 테이블, 다단 텍스트, sticky 컬럼, 다이어그램 섹션, metadata strip)마다 고유한 서브스킬 참조 파일 보유. 사용자가 'FigJam 프로젝트 계획', '대화형 프로젝트 계획', '/generate-project-plan'을 요청하거나 PRD를 제공하고 섹션별로 콘텐츠+렌더링 확인을 원할 때 사용."
 disable-model-invocation: false
 ---
 

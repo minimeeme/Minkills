@@ -1,6 +1,6 @@
 ---
 name: kotlin-patterns
-description: Idiomatic Kotlin patterns, best practices, and conventions for building robust, efficient, and maintainable Kotlin applications with coroutines, null safety, and DSL builders.
+description: "coroutines, null 안전성, DSL 빌더로 견고하고 효율적이며 유지보수 가능한 Kotlin 애플리케이션을 구축하기 위한 관용적 Kotlin 패턴, 모범 사례, 규칙."
 origin: ECC
 ---
 

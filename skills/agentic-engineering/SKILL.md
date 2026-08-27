@@ -1,6 +1,6 @@
 ---
 name: agentic-engineering
-description: Operate as an agentic engineer using eval-first execution, decomposition, and cost-aware model routing.
+description: "eval-first 실행, 작업 분해, 비용 인식 model routing을 활용해 에이전틱 엔지니어로 작업"
 origin: ECC
 ---
 

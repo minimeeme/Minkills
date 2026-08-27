@@ -1,6 +1,6 @@
 ---
 name: perl-testing
-description: Perl testing patterns using Test2::V0, Test::More, prove runner, mocking, coverage with Devel::Cover, and TDD methodology.
+description: "Test2::V0, Test::More, prove 러너, 모킹, Devel::Cover 커버리지, TDD 방법론을 사용하는 Perl 테스트 패턴."
 origin: ECC
 ---
 

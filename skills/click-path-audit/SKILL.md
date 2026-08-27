@@ -1,6 +1,6 @@
 ---
 name: click-path-audit
-description: "Trace every user-facing button/touchpoint through its full state change sequence to find bugs where functions individually work but cancel each other out, produce wrong final state, or leave the UI in an inconsistent state. Use when: systematic debugging found no bugs but users report broken buttons, or after any major refactor touching shared state stores."
+description: "모든 사용자 대상 버튼/터치포인트를 전체 상태 변경 시퀀스를 따라 추적해, 함수가 개별적으로는 작동하지만 서로 상쇄되거나 잘못된 최종 상태를 만들거나 UI를 일관되지 않은 상태로 남기는 버그를 찾음. 사용 시점: 체계적 디버깅으로 버그를 못 찾았는데 사용자가 버튼이 깨졌다고 보고하거나, 공유 state store를 건드린 대규모 리팩터 이후"
 origin: community
 ---
 

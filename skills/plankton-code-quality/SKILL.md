@@ -1,6 +1,6 @@
 ---
 name: plankton-code-quality
-description: "Write-time code quality enforcement using Plankton — auto-formatting, linting, and Claude-powered fixes on every file edit via hooks."
+description: "Plankton을 이용한 작성 시점(write-time) 코드 품질 강제 — hooks를 통해 모든 파일 편집마다 자동 포매팅, 린팅, Claude 기반 수정."
 origin: community
 ---
 

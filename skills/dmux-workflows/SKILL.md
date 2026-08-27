@@ -1,6 +1,6 @@
 ---
 name: dmux-workflows
-description: Multi-agent orchestration using dmux (tmux pane manager for AI agents). Patterns for parallel agent workflows across Claude Code, Codex, OpenCode, and other harnesses. Use when running multiple agent sessions in parallel or coordinating multi-agent development workflows.
+description: "dmux(AI agent용 tmux pane 관리자)를 사용한 멀티 agent 오케스트레이션. Claude Code, Codex, OpenCode 등 여러 harness에 걸친 병렬 agent 워크플로 패턴. 여러 agent 세션을 병렬로 실행하거나 멀티 agent 개발 워크플로를 조율할 때 사용."
 origin: ECC
 ---
 

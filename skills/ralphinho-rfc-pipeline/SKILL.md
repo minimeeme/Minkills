@@ -1,6 +1,6 @@
 ---
 name: ralphinho-rfc-pipeline
-description: RFC-driven multi-agent DAG execution pattern with quality gates, merge queues, and work unit orchestration.
+description: "품질 게이트, 머지 큐, 작업 단위 오케스트레이션을 갖춘 RFC 기반 멀티 에이전트 DAG 실행 패턴."
 origin: ECC
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: continuous-learning-v2
-description: Instinct-based learning system that observes sessions via hooks, creates atomic instincts with confidence scoring, and evolves them into skills/commands/agents. v2.1 adds project-scoped instincts to prevent cross-project contamination.
+description: "hook을 통해 세션을 관찰하고, 신뢰도 점수를 매긴 원자적 instinct를 생성하며, 이를 skill/command/agent로 발전시키는 instinct 기반 학습 시스템. v2.1은 프로젝트 범위 instinct를 추가해 프로젝트 간 오염을 방지."
 origin: ECC
 version: 2.1.0
 ---

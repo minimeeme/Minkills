@@ -1,6 +1,6 @@
 ---
 name: figma-use-motion
-description: "Motion / animation context for the `use_figma` MCP tool — animating Figma nodes via manual keyframes, animation styles, easing, and timeline duration. Load alongside figma-use whenever a task involves adding, editing, or inspecting animation on a node."
+description: "use_figma MCP 도구의 모션/애니메이션 컨텍스트 — 수동 키프레임, 애니메이션 스타일, 이징(easing), 타임라인 길이를 통한 Figma 노드 애니메이션. 노드에 애니메이션을 추가·수정·검사하는 작업 시 figma-use와 함께 로드."
 disable-model-invocation: false
 ---
 

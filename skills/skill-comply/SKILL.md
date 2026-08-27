@@ -1,6 +1,6 @@
 ---
 name: skill-comply
-description: Visualize whether skills, rules, and agent definitions are actually followed — auto-generates scenarios at 3 prompt strictness levels, runs agents, classifies behavioral sequences, and reports compliance rates with full tool call timelines
+description: "skill, rule, agent 정의가 실제로 준수되는지 시각화 — 3단계 prompt 엄격도로 시나리오를 자동 생성하고, agent를 실행하며, 행동 시퀀스를 분류하고, 전체 tool call 타임라인과 함께 준수율을 보고."
 origin: ECC
 tools: Read, Bash
 ---

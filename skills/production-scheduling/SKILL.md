@@ -1,13 +1,6 @@
 ---
 name: production-scheduling
-description: >
-  Codified expertise for production scheduling, job sequencing, line balancing,
-  changeover optimization, and bottleneck resolution in discrete and batch
-  manufacturing. Informed by production schedulers with 15+ years experience.
-  Includes TOC/drum-buffer-rope, SMED, OEE analysis, disruption response
-  frameworks, and ERP/MES interaction patterns. Use when scheduling production,
-  resolving bottlenecks, optimizing changeovers, responding to disruptions,
-  or balancing manufacturing lines.
+description: "이산 및 배치 제조에서 생산 스케줄링, 작업 시퀀싱, 라인 밸런싱, changeover 최적화, 병목 해소를 위한 체계화된 전문 지식. 15년 이상 경력의 생산 스케줄러 기반. TOC/drum-buffer-rope, SMED, OEE 분석, 중단 대응 프레임워크, ERP/MES 연동 패턴 포함. 생산 스케줄링, 병목 해소, changeover 최적화, 중단 대응, 제조 라인 밸런싱 시 사용."
 license: Apache-2.0
 version: 1.0.0
 homepage: https://github.com/affaan-m/everything-claude-code

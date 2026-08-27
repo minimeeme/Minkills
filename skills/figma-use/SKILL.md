@@ -1,6 +1,6 @@
 ---
 name: figma-use
-description: "**MANDATORY prerequisite** — you MUST invoke this skill BEFORE every `use_figma` tool call. NEVER call `use_figma` directly without loading this skill first. Skipping it causes common, hard-to-debug failures. Trigger whenever the user wants to perform a write action or a unique read action that requires JavaScript execution in the Figma file context — e.g. create/edit/delete nodes, set up variables or tokens, build components and variants, modify auto-layout or fills, bind variables to properties, or inspect file structure programmatically."
+description: "**필수 선행 단계** — 모든 use_figma 도구 호출 전 반드시 이 스킬을 먼저 실행. 이 스킬을 먼저 로드하지 않고 use_figma를 직접 호출하지 말 것. 건너뛰면 디버깅하기 어려운 흔한 오류가 발생. 사용자가 Figma 파일 컨텍스트에서 JavaScript 실행이 필요한 쓰기 작업 또는 고유 읽기 작업을 원할 때 실행 — 예: 노드 생성/수정/삭제, 변수나 토큰 설정, 컴포넌트와 variant 구축, auto-layout이나 fill 수정, 속성에 변수 바인딩, 파일 구조 프로그래밍 방식 검사."
 disable-model-invocation: false
 ---
 

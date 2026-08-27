@@ -1,6 +1,6 @@
 ---
 name: strategic-compact
-description: Suggests manual context compaction at logical intervals to preserve context through task phases rather than arbitrary auto-compaction.
+description: "임의의 auto-compaction 대신 논리적 지점에서 수동 context compaction을 제안하여 작업 단계 전반의 context를 보존."
 origin: ECC
 ---
 

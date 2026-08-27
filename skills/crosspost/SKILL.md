@@ -1,6 +1,6 @@
 ---
 name: crosspost
-description: Multi-platform content distribution across X, LinkedIn, Threads, and Bluesky. Adapts content per platform using content-engine patterns. Never posts identical content cross-platform. Use when the user wants to distribute content across social platforms.
+description: "X, LinkedIn, Threads, Bluesky 전반의 멀티 플랫폼 콘텐츠 배포. content-engine 패턴을 사용해 플랫폼별로 콘텐츠를 변형. 동일한 콘텐츠를 여러 플랫폼에 그대로 게시하지 않음. 사용자가 소셜 플랫폼에 콘텐츠를 배포하고자 할 때 사용."
 origin: ECC
 ---
 

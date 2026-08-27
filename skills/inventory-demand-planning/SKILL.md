@@ -1,13 +1,6 @@
 ---
 name: inventory-demand-planning
-description: >
-  Codified expertise for demand forecasting, safety stock optimization,
-  replenishment planning, and promotional lift estimation at multi-location
-  retailers. Informed by demand planners with 15+ years experience managing
-  hundreds of SKUs. Includes forecasting method selection, ABC/XYZ analysis,
-  seasonal transition management, and vendor negotiation frameworks.
-  Use when forecasting demand, setting safety stock, planning replenishment,
-  managing promotions, or optimizing inventory levels.
+description: "다지점 소매업체에서의 수요 예측, 안전재고 최적화, 보충 계획, 프로모션 상승분 추정에 대한 체계화된 전문지식. 수백 개 SKU를 관리하는 15년 이상 경력의 수요 계획 담당자 지식 기반. 예측 방법 선택, ABC/XYZ 분석, 시즌 전환 관리, 벤더 협상 프레임워크 포함. 수요 예측, 안전재고 설정, 보충 계획, 프로모션 관리, 재고 수준 최적화할 때 사용."
 license: Apache-2.0
 version: 1.0.0
 homepage: https://github.com/affaan-m/everything-claude-code

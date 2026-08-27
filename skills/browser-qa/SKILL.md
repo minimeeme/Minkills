@@ -1,3 +1,8 @@
+---
+name: browser-qa
+description: "Browser QA — 자동화된 시각 테스트 및 상호작용"
+---
+
 # Browser QA — Automated Visual Testing & Interaction
 
 ## When to Use

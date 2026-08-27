@@ -1,6 +1,6 @@
 ---
 name: market-research
-description: Conduct market research, competitive analysis, investor due diligence, and industry intelligence with source attribution and decision-oriented summaries. Use when the user wants market sizing, competitor comparisons, fund research, technology scans, or research that informs business decisions.
+description: "출처 표기와 의사결정 지향적 요약을 갖춘 시장 조사, 경쟁 분석, 투자자 실사, 산업 인텔리전스 수행. 사용자가 시장 규모 추정, 경쟁사 비교, 펀드 리서치, 기술 스캔 또는 비즈니스 의사결정에 도움이 되는 리서치를 원할 때 사용."
 origin: ECC
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: deployment-patterns
-description: Deployment workflows, CI/CD pipeline patterns, Docker containerization, health checks, rollback strategies, and production readiness checklists for web applications.
+description: "웹 애플리케이션을 위한 배포 워크플로, CI/CD 파이프라인 패턴, Docker 컨테이너화, health check, 롤백 전략, 프로덕션 준비 체크리스트."
 origin: ECC
 ---
 

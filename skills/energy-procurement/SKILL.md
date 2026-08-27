@@ -1,13 +1,6 @@
 ---
 name: energy-procurement
-description: >
-  Codified expertise for electricity and gas procurement, tariff optimization,
-  demand charge management, renewable PPA evaluation, and multi-facility energy
-  cost management. Informed by energy procurement managers with 15+ years
-  experience at large commercial and industrial consumers. Includes market
-  structure analysis, hedging strategies, load profiling, and sustainability
-  reporting frameworks. Use when procuring energy, optimizing tariffs, managing
-  demand charges, evaluating PPAs, or developing energy strategies.
+description: "전력 및 가스 조달, 요금제 최적화, 수요 요금(demand charge) 관리, 재생에너지 PPA 평가, 다중 시설 에너지 비용 관리를 위한 정형화된 전문 지식. 대형 상업·산업 소비자에서 15년 이상 경력의 에너지 조달 매니저 경험 기반. 시장 구조 분석, 헤징 전략, 부하 프로파일링, 지속가능성 보고 프레임워크 포함. 에너지 조달, 요금제 최적화, 수요 요금 관리, PPA 평가, 에너지 전략 수립 시 사용."
 license: Apache-2.0
 version: 1.0.0
 homepage: https://github.com/affaan-m/everything-claude-code

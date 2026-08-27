@@ -1,13 +1,6 @@
 ---
 name: returns-reverse-logistics
-description: >
-  Codified expertise for returns authorization, receipt and inspection,
-  disposition decisions, refund processing, fraud detection, and warranty
-  claims management. Informed by returns operations managers with 15+ years
-  experience. Includes grading frameworks, disposition economics, fraud
-  pattern recognition, and vendor recovery processes. Use when handling
-  product returns, reverse logistics, refund decisions, return fraud
-  detection, or warranty claims.
+description: "반품 승인, 입고 및 검수, 처분(disposition) 결정, 환불 처리, 사기 탐지, 보증 클레임 관리를 위한 체계화된 전문 지식. 15년 이상 경력의 반품 운영 관리자 기반. 등급 판정 프레임워크, 처분 경제성, 사기 패턴 인식, 벤더 회수 프로세스 포함. 제품 반품, 역물류, 환불 결정, 반품 사기 탐지, 보증 클레임 처리 시 사용."
 license: Apache-2.0
 version: 1.0.0
 homepage: https://github.com/affaan-m/everything-claude-code

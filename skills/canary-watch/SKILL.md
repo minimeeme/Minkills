@@ -1,3 +1,8 @@
+---
+name: canary-watch
+description: "Canary Watch — 배포 후 모니터링"
+---
+
 # Canary Watch — Post-Deploy Monitoring
 
 ## When to Use

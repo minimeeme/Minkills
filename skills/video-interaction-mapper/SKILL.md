@@ -1,17 +1,6 @@
 ---
 name: video-interaction-mapper
-description: >
-  This skill should be used when the user asks to analyze a UI screen recording and
-  map interaction states into Figma. Trigger for requests such as "put video frames
-  in Figma", "extract states from my recording", "map interactions from video to
-  Figma", "analyze this screen recording", "create a storyboard from my video",
-  "deconstruct this interaction in Figma", "annotate the UI states in my recording",
-  or "pull the key moments from this video into Figma". Also trigger when the user
-  references a video file (.mp4, .mov, .webm, .avi) together with Figma, design
-  review, interaction analysis, prototypes, or UI states. The skill extracts key
-  visual moments from a video, infers interaction triggers, and builds an annotated
-  Figma Design storyboard using native Figma annotations and uploaded screenshot
-  assets.
+description: "UI 화면 녹화를 분석해 interaction 상태를 Figma에 매핑할 때 사용. \"put video frames in Figma\", \"extract states from my recording\", \"map interactions from video to Figma\", \"analyze this screen recording\", \"create a storyboard from my video\", \"deconstruct this interaction in Figma\" 등의 요청에 트리거. 비디오 파일(.mp4, .mov, .webm, .avi)이 Figma, 디자인 리뷰, interaction 분석, 프로토타입, UI 상태와 함께 언급될 때도 트리거. 비디오에서 핵심 시각적 순간을 추출하고 interaction 트리거를 추론해, 네이티브 Figma annotation과 업로드된 스크린샷 asset으로 주석 달린 Figma Design 스토리보드를 구성."
 ---
 
 # Video Interaction Mapper

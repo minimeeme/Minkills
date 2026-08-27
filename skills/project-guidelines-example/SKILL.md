@@ -1,6 +1,6 @@
 ---
 name: project-guidelines-example
-description: "Example project-specific skill template based on a real production application."
+description: "실제 프로덕션 애플리케이션을 기반으로 한 프로젝트별 스킬 템플릿 예시."
 origin: ECC
 ---
 

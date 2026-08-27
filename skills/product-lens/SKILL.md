@@ -1,3 +1,8 @@
+---
+name: product-lens
+description: "기능을 만들기 전에 '왜'를 먼저 검증하는 제품 사고 프레임워크. 새 기능 시작 전 검증, 주간 제품 리뷰에서 올바른 것을 만들고 있는지 점검할 때 사용."
+---
+
 # Product Lens — Think Before You Build
 
 ## When to Use

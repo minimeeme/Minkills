@@ -1,6 +1,6 @@
 ---
 name: api-design
-description: REST API design patterns including resource naming, status codes, pagination, filtering, error responses, versioning, and rate limiting for production APIs.
+description: "프로덕션 API를 위한 REST API 설계 패턴 — 리소스 네이밍, status code, 페이지네이션, 필터링, 에러 응답, 버저닝, rate limiting 포함"
 origin: ECC
 ---
 

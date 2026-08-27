@@ -1,6 +1,6 @@
 ---
 name: deep-research
-description: Multi-source deep research using firecrawl and exa MCPs. Searches the web, synthesizes findings, and delivers cited reports with source attribution. Use when the user wants thorough research on any topic with evidence and citations.
+description: "firecrawl 및 exa MCP를 사용하는 다중 소스 심층 리서치. 웹을 검색하고, 결과를 종합하며, 출처 표기가 포함된 인용 보고서를 제공. 사용자가 근거와 인용을 갖춘 철저한 리서치를 원할 때 사용."
 origin: ECC
 ---
 

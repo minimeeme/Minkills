@@ -1,6 +1,6 @@
 ---
 name: golang-testing
-description: Go testing patterns including table-driven tests, subtests, benchmarks, fuzzing, and test coverage. Follows TDD methodology with idiomatic Go practices.
+description: "table-driven 테스트, 서브테스트, 벤치마크, 퍼징, 테스트 커버리지를 포함한 Go 테스트 패턴. 관용적 Go 방식으로 TDD 방법론을 따름."
 origin: ECC
 ---
 

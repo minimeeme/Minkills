@@ -1,6 +1,6 @@
 ---
 name: figma-create-new-file
-description: "**MANDATORY prerequisite** — you MUST invoke this skill BEFORE every `create_new_file` tool call. NEVER call `create_new_file` directly without loading this skill first. Trigger whenever the user wants a new blank Figma file — a new design, FigJam, or Slides file — or when you need a fresh file before calling `use_figma`. Usage — /figma-create-new-file [editorType] [fileName] (e.g. /figma-create-new-file figjam My Whiteboard, /figma-create-new-file slides Q3 Review)"
+description: "**필수 선행 단계** — 모든 create_new_file 도구 호출 전 반드시 이 스킬을 먼저 실행. 이 스킬을 먼저 로드하지 않고 create_new_file을 직접 호출하지 말 것. 사용자가 새 빈 Figma 파일(새 design, FigJam, Slides 파일)을 원하거나 use_figma 호출 전 새 파일이 필요할 때 실행. 사용법 — /figma-create-new-file [editorType] [fileName] (예: /figma-create-new-file figjam My Whiteboard, /figma-create-new-file slides Q3 Review)"
 disable-model-invocation: false
 ---
 

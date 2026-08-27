@@ -1,6 +1,6 @@
 ---
 name: java-coding-standards
-description: "Java coding standards for Spring Boot services: naming, immutability, Optional usage, streams, exceptions, generics, and project layout."
+description: "Spring Boot 서비스를 위한 Java 코딩 표준: 네이밍, 불변성, Optional 사용, 스트림, 예외 처리, 제네릭, 프로젝트 레이아웃."
 origin: ECC
 ---
 

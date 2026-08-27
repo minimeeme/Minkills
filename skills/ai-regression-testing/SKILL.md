@@ -1,6 +1,6 @@
 ---
 name: ai-regression-testing
-description: Regression testing strategies for AI-assisted development. Sandbox-mode API testing without database dependencies, automated bug-check workflows, and patterns to catch AI blind spots where the same model writes and reviews code.
+description: "AI 지원 개발을 위한 회귀 테스트 전략. 데이터베이스 의존성 없는 sandbox 모드 API 테스트, 자동화된 bug-check 워크플로우, 그리고 같은 모델이 코드를 작성하고 리뷰할 때 생기는 AI 맹점을 잡아내는 패턴"
 origin: ECC
 ---
 

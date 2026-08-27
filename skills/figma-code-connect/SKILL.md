@@ -1,6 +1,6 @@
 ---
 name: figma-code-connect
-description: Creates and maintains Figma Code Connect template files that map Figma components to code snippets. Use when the user mentions Code Connect, Figma component mapping, design-to-code translation, or asks to create/update .figma.ts or .figma.js files.
+description: "Figma 컴포넌트를 코드 스니펫에 매핑하는 Figma Code Connect 템플릿 파일 생성 및 관리. Code Connect, Figma 컴포넌트 매핑, design-to-code 변환을 언급하거나 .figma.ts 또는 .figma.js 파일 생성/수정을 요청할 때 사용."
 disable-model-invocation: false
 ---
 

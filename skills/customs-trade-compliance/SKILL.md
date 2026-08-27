@@ -1,13 +1,6 @@
 ---
 name: customs-trade-compliance
-description: >
-  Codified expertise for customs documentation, tariff classification, duty
-  optimization, restricted party screening, and regulatory compliance across
-  multiple jurisdictions. Informed by trade compliance specialists with 15+
-  years experience. Includes HS classification logic, Incoterms application,
-  FTA utilization, and penalty mitigation. Use when handling customs clearance,
-  tariff classification, trade compliance, import/export documentation, or
-  duty optimization.
+description: "관세 문서, 관세 분류, 관세 최적화, 제한 당사자 스크리닝, 여러 관할권의 규제 준수를 위한 체계화된 전문성. 15년 이상 경력의 무역 준수 전문가 지식 반영. HS 분류 로직, Incoterms 적용, FTA 활용, 벌칙 완화 포함. 통관, 관세 분류, 무역 준수, 수출입 문서, 관세 최적화를 다룰 때 사용."
 license: Apache-2.0
 version: 1.0.0
 homepage: https://github.com/affaan-m/everything-claude-code

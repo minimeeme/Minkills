@@ -1,6 +1,6 @@
 ---
 name: perl-patterns
-description: Modern Perl 5.36+ idioms, best practices, and conventions for building robust, maintainable Perl applications.
+description: "견고하고 유지보수 가능한 Perl 애플리케이션을 위한 modern Perl 5.36+ 관용구, 모범 사례, 관례."
 origin: ECC
 ---
 
