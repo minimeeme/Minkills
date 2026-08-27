@@ -1,6 +1,6 @@
 ---
 name: figma-implement-motion
-description: Translates Figma motion and animations into production-ready application code. Use when implementing animation/motion from a Figma design — user mentions "implement this motion", "add animation from Figma", "animate this component", provides a Figma URL whose node is animated, or when `get_design_context` returns motion data or instructs you to call `get_motion_context`.
+description: "Figma 모션과 애니메이션을 프로덕션 수준의 애플리케이션 코드로 변환. Figma 디자인의 애니메이션/모션을 구현할 때 사용 — 사용자가 'implement this motion', 'add animation from Figma', 'animate this component'를 언급하거나, 노드에 애니메이션이 있는 Figma URL을 제공하거나, get_design_context가 모션 데이터를 반환하거나 get_motion_context 호출을 지시할 때."
 disable-model-invocation: false
 ---
 

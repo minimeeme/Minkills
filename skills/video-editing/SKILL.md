@@ -1,6 +1,6 @@
 ---
 name: video-editing
-description: AI-assisted video editing workflows for cutting, structuring, and augmenting real footage. Covers the full pipeline from raw capture through FFmpeg, Remotion, ElevenLabs, fal.ai, and final polish in Descript or CapCut. Use when the user wants to edit video, cut footage, create vlogs, or build video content.
+description: "실제 footage를 자르고, 구조화하고, 보강하는 AI 지원 비디오 편집 워크플로. 원본 캡처부터 FFmpeg, Remotion, ElevenLabs, fal.ai, 그리고 Descript나 CapCut의 최종 다듬기까지 전체 파이프라인을 다룸. 비디오 편집, footage 커팅, vlog 제작, 비디오 콘텐츠 제작 시 사용."
 origin: ECC
 ---
 

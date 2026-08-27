@@ -1,6 +1,6 @@
 ---
 name: e2e-testing
-description: Playwright E2E testing patterns, Page Object Model, configuration, CI/CD integration, artifact management, and flaky test strategies.
+description: "Playwright E2E 테스트 패턴, Page Object Model, 설정, CI/CD 통합, 아티팩트 관리, 플래키 테스트 대응 전략."
 origin: ECC
 ---
 

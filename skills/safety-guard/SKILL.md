@@ -1,3 +1,8 @@
+---
+name: safety-guard
+description: "파괴적 작업 방지. 프로덕션 시스템 작업, agent의 full-auto 자율 실행, 특정 디렉터리로 편집 제한, migration/배포/데이터 변경 등 민감한 작업 시 사용."
+---
+
 # Safety Guard — Prevent Destructive Operations
 
 ## When to Use

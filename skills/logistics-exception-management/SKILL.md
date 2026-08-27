@@ -1,12 +1,6 @@
 ---
 name: logistics-exception-management
-description: >
-  Codified expertise for handling freight exceptions, shipment delays,
-  damages, losses, and carrier disputes. Informed by logistics professionals
-  with 15+ years operational experience. Includes escalation protocols,
-  carrier-specific behaviors, claims procedures, and judgment frameworks.
-  Use when handling shipping exceptions, freight claims, delivery issues,
-  or carrier disputes.
+description: "화물 예외, 배송 지연, 파손, 분실, 운송사 분쟁을 처리하기 위한 체계화된 전문지식. 15년 이상 운영 경력의 물류 전문가 지식 기반. 에스컬레이션 프로토콜, 운송사별 행동 특성, 클레임 절차, 판단 프레임워크 포함. 배송 예외, 화물 클레임, 배송 문제 또는 운송사 분쟁을 처리할 때 사용."
 license: Apache-2.0
 version: 1.0.0
 homepage: https://github.com/affaan-m/everything-claude-code

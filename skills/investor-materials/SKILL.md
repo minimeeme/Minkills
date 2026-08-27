@@ -1,6 +1,6 @@
 ---
 name: investor-materials
-description: Create and update pitch decks, one-pagers, investor memos, accelerator applications, financial models, and fundraising materials. Use when the user needs investor-facing documents, projections, use-of-funds tables, milestone plans, or materials that must stay internally consistent across multiple fundraising assets.
+description: "피치덱, 원페이저, 투자자 메모, 액셀러레이터 지원서, 재무 모델, 펀드레이징 자료를 작성 및 업데이트. 사용자가 투자자 대상 문서, 추정치, use-of-funds 테이블, 마일스톤 계획 또는 여러 펀드레이징 자산 간에 내부적으로 일관성을 유지해야 하는 자료가 필요할 때 사용."
 origin: ECC
 ---
 

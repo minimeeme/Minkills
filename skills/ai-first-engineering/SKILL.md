@@ -1,6 +1,6 @@
 ---
 name: ai-first-engineering
-description: Engineering operating model for teams where AI agents generate a large share of implementation output.
+description: "AI 에이전트가 구현 산출물의 상당 부분을 생성하는 팀을 위한 엔지니어링 운영 모델"
 origin: ECC
 ---
 

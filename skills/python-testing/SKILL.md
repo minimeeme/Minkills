@@ -1,6 +1,6 @@
 ---
 name: python-testing
-description: Python testing strategies using pytest, TDD methodology, fixtures, mocking, parametrization, and coverage requirements.
+description: "pytest, TDD 방법론, fixtures, 모킹, 파라미터화, 커버리지 요건을 사용하는 Python 테스트 전략."
 origin: ECC
 ---
 

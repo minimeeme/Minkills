@@ -1,6 +1,6 @@
 ---
 name: nextjs-turbopack
-description: Next.js 16+ and Turbopack — incremental bundling, FS caching, dev speed, and when to use Turbopack vs webpack.
+description: "Next.js 16+와 Turbopack — 증분 번들링, FS 캐싱, 개발 속도, 그리고 Turbopack vs webpack 선택 기준."
 origin: ECC
 ---
 

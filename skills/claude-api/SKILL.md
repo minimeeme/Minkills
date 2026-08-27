@@ -1,6 +1,6 @@
 ---
 name: claude-api
-description: Anthropic Claude API patterns for Python and TypeScript. Covers Messages API, streaming, tool use, vision, extended thinking, batches, prompt caching, and Claude Agent SDK. Use when building applications with the Claude API or Anthropic SDKs.
+description: "Python 및 TypeScript용 Anthropic Claude API 패턴. Messages API, 스트리밍, tool use, vision, extended thinking, batches, prompt caching, Claude Agent SDK 다룸. Claude API나 Anthropic SDK로 애플리케이션을 구축할 때 사용"
 origin: ECC
 ---
 

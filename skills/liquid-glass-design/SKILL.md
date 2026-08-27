@@ -1,6 +1,6 @@
 ---
 name: liquid-glass-design
-description: iOS 26 Liquid Glass design system — dynamic glass material with blur, reflection, and interactive morphing for SwiftUI, UIKit, and WidgetKit.
+description: "iOS 26 Liquid Glass 디자인 시스템 — SwiftUI, UIKit, WidgetKit을 위한 블러, 반사, 인터랙티브 모핑을 갖춘 동적 glass 머티리얼."
 ---
 
 # Liquid Glass Design System (iOS 26)

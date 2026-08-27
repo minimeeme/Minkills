@@ -1,6 +1,6 @@
 ---
 name: mcp-server-patterns
-description: Build MCP servers with Node/TypeScript SDK — tools, resources, prompts, Zod validation, stdio vs Streamable HTTP. Use Context7 or official MCP docs for latest API.
+description: "Node/TypeScript SDK로 MCP 서버 구축 — 도구, 리소스, 프롬프트, Zod 검증, stdio vs Streamable HTTP. 최신 API는 Context7 또는 공식 MCP 문서 참조."
 origin: ECC
 ---
 

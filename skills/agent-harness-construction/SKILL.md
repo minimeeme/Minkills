@@ -1,6 +1,6 @@
 ---
 name: agent-harness-construction
-description: Design and optimize AI agent action spaces, tool definitions, and observation formatting for higher completion rates.
+description: "완료율을 높이기 위해 AI 에이전트의 action space, tool 정의, observation 포맷팅을 설계하고 최적화"
 origin: ECC
 ---
 

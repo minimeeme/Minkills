@@ -1,6 +1,6 @@
 ---
 name: figma-swiftui
-description: "SwiftUI ↔ Figma translation. Use whenever the user mentions Swift, SwiftUI, iOS, iPhone, or iPad — in EITHER direction — translating a Figma design into SwiftUI (design → code), or pushing SwiftUI views / screens / tokens back into a Figma file (code → design). Triggers on phrases like 'implement this Figma design in SwiftUI', 'build this screen in Swift', 'push this SwiftUI view to Figma', 'mirror my Swift code in a Figma file', or whenever a Figma URL appears alongside `.swift` files / an `.xcodeproj`. Routes to a direction-specific reference doc; loads alongside `figma-use` for the code → design path."
+description: "SwiftUI ↔ Figma 변환. 사용자가 Swift, SwiftUI, iOS, iPhone, iPad를 언급할 때 양방향 모두 사용 — Figma 디자인을 SwiftUI로 변환(design → code)하거나 SwiftUI 뷰/화면/토큰을 Figma 파일로 푸시(code → design). 'implement this Figma design in SwiftUI', 'build this screen in Swift', 'push this SwiftUI view to Figma', 'mirror my Swift code in a Figma file' 같은 표현이나, Figma URL이 .swift 파일/.xcodeproj와 함께 나타날 때 실행. 방향별 레퍼런스 문서로 라우팅하며, code → design 경로에서는 figma-use와 함께 로드."
 disable-model-invocation: false
 ---
 

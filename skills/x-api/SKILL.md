@@ -1,6 +1,6 @@
 ---
 name: x-api
-description: X/Twitter API integration for posting tweets, threads, reading timelines, search, and analytics. Covers OAuth auth patterns, rate limits, and platform-native content posting. Use when the user wants to interact with X programmatically.
+description: "트윗·스레드 게시, 타임라인 읽기, 검색, 분석을 위한 X/Twitter API 연동. OAuth 인증 패턴, rate limit, 플랫폼 네이티브 콘텐츠 게시를 다룸. X와 프로그래밍 방식으로 상호작용하고 싶을 때 사용."
 origin: ECC
 ---
 

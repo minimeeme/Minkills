@@ -1,6 +1,6 @@
 ---
 name: figma-generate-design
-description: "Use this skill alongside figma-use when the task involves translating an application page, view, or multi-section layout into Figma. Triggers: 'write to Figma', 'create in Figma from code', 'push page to Figma', 'take this app/page and build it in Figma', 'create a screen', 'build a landing page in Figma', 'update the Figma screen to match code', 'convert this modal/dialog/drawer/panel to Figma'. This is the preferred workflow skill whenever the user wants to build or update a full page, modal, dialog, drawer, sidebar, panel, or any composed multi-section view in Figma from code or a description. Discovers design system components, variables, and styles from Code Connect files, existing screens, and library search, then imports them and assembles views incrementally section-by-section using design system tokens instead of hardcoded values."
+description: "애플리케이션 페이지, 뷰, 다중 섹션 레이아웃을 Figma로 옮기는 작업 시 figma-use와 함께 사용. 트리거: 'write to Figma', 'create in Figma from code', 'push page to Figma', 'take this app/page and build it in Figma', 'create a screen', 'build a landing page in Figma', 'update the Figma screen to match code', 'convert this modal/dialog/drawer/panel to Figma'. 코드나 설명으로부터 Figma에 전체 페이지, 모달, 다이얼로그, 드로어, 사이드바, 패널 등 다중 섹션으로 구성된 뷰를 제작·수정할 때 선호되는 워크플로 스킬. Code Connect 파일, 기존 화면, 라이브러리 검색에서 디자인 시스템 컴포넌트·변수·스타일을 찾아 임포트한 뒤, 하드코딩된 값 대신 디자인 시스템 토큰으로 섹션별로 점진적으로 뷰를 조립."
 disable-model-invocation: false
 ---
 

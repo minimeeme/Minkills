@@ -1,6 +1,6 @@
 ---
 name: security-scan
-description: Scan your Claude Code configuration (.claude/ directory) for security vulnerabilities, misconfigurations, and injection risks using AgentShield. Checks CLAUDE.md, settings.json, MCP servers, hooks, and agent definitions.
+description: "AgentShield로 Claude Code 설정(.claude/ 디렉터리)의 보안 취약점, 잘못된 설정, injection 위험을 스캔. CLAUDE.md, settings.json, MCP server, hook, agent 정의를 점검."
 origin: ECC
 ---
 

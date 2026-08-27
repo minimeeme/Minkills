@@ -1,17 +1,6 @@
 ---
 name: prompt-optimizer
-description: >-
-  Analyze raw prompts, identify intent and gaps, match ECC components
-  (skills/commands/agents/hooks), and output a ready-to-paste optimized
-  prompt. Advisory role only — never executes the task itself.
-  TRIGGER when: user says "optimize prompt", "improve my prompt",
-  "how to write a prompt for", "help me prompt", "rewrite this prompt",
-  or explicitly asks to enhance prompt quality. Also triggers on Chinese
-  equivalents: "优化prompt", "改进prompt", "怎么写prompt", "帮我优化这个指令".
-  DO NOT TRIGGER when: user wants the task executed directly, or says
-  "just do it" / "直接做". DO NOT TRIGGER when user says "优化代码",
-  "优化性能", "optimize performance", "optimize this code" — those are
-  refactoring/performance tasks, not prompt optimization.
+description: "원시 프롬프트를 분석해 의도와 공백을 파악하고, ECC 컴포넌트(skills/commands/agents/hooks)를 매칭해 바로 붙여넣을 수 있는 최적화된 프롬프트를 출력. 자문 역할만 수행 — 작업 자체를 실행하지 않음. TRIGGER 조건: 사용자가 \"optimize prompt\", \"improve my prompt\", \"how to write a prompt for\", \"help me prompt\", \"rewrite this prompt\"라고 하거나 명시적으로 프롬프트 품질 향상을 요청할 때. 중국어 표현도 트리거: \"优化prompt\", \"改进prompt\", \"怎么写prompt\", \"帮我优化这个指令\". 트리거 금지: 사용자가 작업을 직접 실행하길 원하거나 \"just do it\" / \"直接做\"라고 할 때. 또한 \"优化代码\", \"优化性能\", \"optimize performance\", \"optimize this code\"는 리팩터링/성능 작업이지 프롬프트 최적화가 아니므로 트리거 금지."
 origin: community
 metadata:
   author: YannJY02

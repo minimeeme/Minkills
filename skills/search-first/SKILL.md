@@ -1,6 +1,6 @@
 ---
 name: search-first
-description: Research-before-coding workflow. Search for existing tools, libraries, and patterns before writing custom code. Invokes the researcher agent.
+description: "코딩 전 리서치 워크플로. 커스텀 코드를 작성하기 전에 기존 도구, 라이브러리, 패턴을 검색. researcher agent를 호출."
 origin: ECC
 ---
 

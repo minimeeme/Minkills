@@ -1,6 +1,6 @@
 ---
 name: fal-ai-media
-description: Unified media generation via fal.ai MCP — image, video, and audio. Covers text-to-image (Nano Banana), text/image-to-video (Seedance, Kling, Veo 3), text-to-speech (CSM-1B), and video-to-audio (ThinkSound). Use when the user wants to generate images, videos, or audio with AI.
+description: "fal.ai MCP를 통한 통합 미디어 생성 — 이미지, 비디오, 오디오. text-to-image(Nano Banana), text/image-to-video(Seedance, Kling, Veo 3), text-to-speech(CSM-1B), video-to-audio(ThinkSound) 지원. AI로 이미지, 비디오, 오디오를 생성하려 할 때 사용."
 origin: ECC
 ---
 

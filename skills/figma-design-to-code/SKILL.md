@@ -1,6 +1,6 @@
 ---
 name: figma-design-to-code
-description: "**MANDATORY prerequisite** — you MUST invoke this skill BEFORE calling the `get_design_context` Figma MCP tool. You MUST trigger this skill whenever the user wants to implement, build, port, or code up a Figma design as code. Example prompts (not exhaustive) are 'implement this Figma design', 'build this screen from Figma', 'turn this Figma into code', 'design to code'. This skill provides critical instructions and steps to the agent on how to correctly implement Figma designs in code and must NOT be skipped."
+description: "**필수 선행 단계** — get_design_context Figma MCP 도구 호출 전 반드시 이 스킬을 먼저 실행. 사용자가 Figma 디자인을 코드로 구현·제작·이식·작성하려 할 때 반드시 이 스킬을 실행. 예시 프롬프트(전부는 아님): 'implement this Figma design', 'build this screen from Figma', 'turn this Figma into code', 'design to code'. Figma 디자인을 코드로 올바르게 구현하는 핵심 지침과 단계를 제공하며 절대 건너뛰지 말 것."
 disable-model-invocation: false
 ---
 

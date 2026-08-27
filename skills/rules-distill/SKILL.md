@@ -1,6 +1,6 @@
 ---
 name: rules-distill
-description: "Scan skills to extract cross-cutting principles and distill them into rules — append, revise, or create new rule files"
+description: "여러 스킬에 걸친 공통 원칙을 추출해 규칙으로 정제 — 규칙 파일을 추가, 수정, 또는 새로 생성."
 origin: ECC
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: codebase-onboarding
-description: Analyze an unfamiliar codebase and generate a structured onboarding guide with architecture map, key entry points, conventions, and a starter CLAUDE.md. Use when joining a new project or setting up Claude Code for the first time in a repo.
+description: "낯선 코드베이스를 분석해 아키텍처 맵, 핵심 진입점, 컨벤션, 시작용 CLAUDE.md를 담은 구조화된 온보딩 가이드 생성. 새 프로젝트에 합류하거나 저장소에서 Claude Code를 처음 설정할 때 사용"
 origin: ECC
 ---
 

@@ -1,3 +1,8 @@
+---
+name: design-system
+description: "Design System — 시각 시스템 생성 및 감사."
+---
+
 # Design System — Generate & Audit Visual Systems
 
 ## When to Use

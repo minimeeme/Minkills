@@ -1,6 +1,6 @@
 ---
 name: laravel-tdd
-description: Test-driven development for Laravel with PHPUnit and Pest, factories, database testing, fakes, and coverage targets.
+description: "PHPUnit과 Pest, 팩토리, 데이터베이스 테스트, fake, 커버리지 목표를 활용한 Laravel의 테스트 주도 개발."
 origin: ECC
 ---
 

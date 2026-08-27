@@ -1,6 +1,6 @@
 ---
 name: videodb
-description: See, Understand, Act on video and audio. See- ingest from local files, URLs, RTSP/live feeds, or live record desktop; return realtime context and playable stream links. Understand- extract frames, build visual/semantic/temporal indexes, and search moments with timestamps and auto-clips. Act- transcode and normalize (codec, fps, resolution, aspect ratio), perform timeline edits (subtitles, text/image overlays, branding, audio overlays, dubbing, translation), generate media assets (image, audio, video), and create real time alerts for events from live streams or desktop capture.
+description: "비디오와 오디오를 보고, 이해하고, 실행. See- 로컬 파일, URL, RTSP/라이브 피드에서 ingest하거나 데스크톱을 라이브 녹화; 실시간 context와 재생 가능한 stream 링크 반환. Understand- 프레임 추출, visual/semantic/temporal 인덱스 구축, timestamp와 auto-clip으로 순간 검색. Act- 트랜스코딩·정규화(codec, fps, 해상도, aspect ratio), 타임라인 편집(자막, 텍스트/이미지 overlay, 브랜딩, 오디오 overlay, dubbing, 번역), 미디어 asset 생성(이미지, 오디오, 비디오), 라이브 stream이나 데스크톱 캡처의 이벤트에 대한 실시간 alert 생성."
 origin: ECC
 allowed-tools: Read Grep Glob Bash(python:*)
 argument-hint: "[task description]"

@@ -1,15 +1,6 @@
 ---
 name: blueprint
-description: >-
-  Turn a one-line objective into a step-by-step construction plan for
-  multi-session, multi-agent engineering projects. Each step has a
-  self-contained context brief so a fresh agent can execute it cold.
-  Includes adversarial review gate, dependency graph, parallel step
-  detection, anti-pattern catalog, and plan mutation protocol.
-  TRIGGER when: user requests a plan, blueprint, or roadmap for a
-  complex multi-PR task, or describes work that needs multiple sessions.
-  DO NOT TRIGGER when: task is completable in a single PR or fewer
-  than 3 tool calls, or user says "just do it".
+description: "한 줄 목표를 멀티 세션·멀티 에이전트 엔지니어링 프로젝트를 위한 단계별 구축 계획으로 전환. 각 단계는 자체 완결적 context brief를 담아 새 에이전트가 아무 사전 정보 없이도 실행 가능. adversarial 리뷰 게이트, 의존성 그래프, 병렬 단계 탐지, anti-pattern 카탈로그, 계획 변경 프로토콜 포함. TRIGGER: 사용자가 복잡한 multi-PR 작업의 plan, blueprint, roadmap을 요청하거나 여러 세션이 필요한 작업을 설명할 때. DO NOT TRIGGER: 단일 PR 또는 3개 미만 tool call로 완료 가능하거나 사용자가 \"just do it\"이라 할 때"
 origin: community
 ---
 

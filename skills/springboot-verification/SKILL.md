@@ -1,6 +1,6 @@
 ---
 name: springboot-verification
-description: "Verification loop for Spring Boot projects: build, static analysis, tests with coverage, security scans, and diff review before release or PR."
+description: "Spring Boot 프로젝트용 검증 loop: 릴리스 또는 PR 전 빌드, 정적 분석, coverage 포함 테스트, 보안 스캔, diff 리뷰."
 origin: ECC
 ---
 

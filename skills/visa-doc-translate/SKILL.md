@@ -1,6 +1,6 @@
 ---
 name: visa-doc-translate
-description: Translate visa application documents (images) to English and create a bilingual PDF with original and translation
+description: "비자 신청 문서(이미지)를 영어로 번역하고 원본과 번역본을 담은 bilingual PDF를 생성."
 ---
 
 You are helping translate visa application documents for visa applications.

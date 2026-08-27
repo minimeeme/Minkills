@@ -1,6 +1,6 @@
 ---
 name: figma-use-figjam
-description: "This skill helps agents use Figma's use_figma MCP tool in the FigJam context. Can be used alongside figma-use which has foundational context for using the use_figma tool."
+description: "FigJam 컨텍스트에서 Figma의 use_figma MCP 도구를 사용하도록 돕는 스킬. use_figma 도구의 기초 컨텍스트를 담은 figma-use와 함께 사용 가능."
 disable-model-invocation: false
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: context-budget
-description: Audits Claude Code context window consumption across agents, skills, MCP servers, and rules. Identifies bloat, redundant components, and produces prioritized token-savings recommendations.
+description: "agent, skill, MCP 서버, rule 전반에 걸친 Claude Code 컨텍스트 윈도우 소비량을 감사. 불필요한 부하와 중복 구성 요소를 식별하고, 우선순위가 매겨진 토큰 절감 권고안을 생성."
 origin: ECC
 ---
 

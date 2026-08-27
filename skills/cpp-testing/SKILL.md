@@ -1,6 +1,6 @@
 ---
 name: cpp-testing
-description: Use only when writing/updating/fixing C++ tests, configuring GoogleTest/CTest, diagnosing failing or flaky tests, or adding coverage/sanitizers.
+description: "C++ 테스트를 작성/수정/고치거나, GoogleTest/CTest를 구성하거나, 실패하거나 flaky한 테스트를 진단하거나, 커버리지/새니타이저를 추가할 때만 사용."
 origin: ECC
 ---
 

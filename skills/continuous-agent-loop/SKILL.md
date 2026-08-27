@@ -1,6 +1,6 @@
 ---
 name: continuous-agent-loop
-description: Patterns for continuous autonomous agent loops with quality gates, evals, and recovery controls.
+description: "품질 게이트, eval, 복구 제어를 갖춘 지속적 자율 agent 루프 패턴."
 origin: ECC
 ---
 

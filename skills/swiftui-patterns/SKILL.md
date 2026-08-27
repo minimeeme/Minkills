@@ -1,6 +1,6 @@
 ---
 name: swiftui-patterns
-description: SwiftUI architecture patterns, state management with @Observable, view composition, navigation, performance optimization, and modern iOS/macOS UI best practices.
+description: "SwiftUI 아키텍처 패턴, @Observable을 이용한 state 관리, view 구성, navigation, 성능 최적화, 최신 iOS/macOS UI 모범 사례."
 ---
 
 # SwiftUI Patterns

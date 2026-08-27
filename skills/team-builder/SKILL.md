@@ -1,6 +1,6 @@
 ---
 name: team-builder
-description: Interactive agent picker for composing and dispatching parallel teams
+description: "병렬 팀을 구성하고 dispatch하기 위한 대화형 agent picker."
 origin: community
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: security-review
-description: Use this skill when adding authentication, handling user input, working with secrets, creating API endpoints, or implementing payment/sensitive features. Provides comprehensive security checklist and patterns.
+description: "authentication 추가, 사용자 입력 처리, secret 취급, API endpoint 생성, 결제/민감 기능 구현 시 사용. 포괄적인 보안 체크리스트와 패턴 제공."
 origin: ECC
 ---
 

@@ -1,3 +1,8 @@
+---
+name: benchmark
+description: "Benchmark — 성능 baseline 측정 및 회귀 탐지"
+---
+
 # Benchmark — Performance Baseline & Regression Detection
 
 ## When to Use

@@ -1,6 +1,6 @@
 ---
 name: figma-generate-diagram
-description: "MANDATORY prerequisite — load this skill BEFORE every `generate_diagram` tool call. NEVER call `generate_diagram` directly without loading this skill first. Trigger whenever the user asks to create, generate, draw, render, sketch, or build a diagram — flowchart, architecture diagram, sequence diagram, ERD or entity-relationship diagram, state diagram or state machine, gantt chart, or timeline. Also trigger when the user mentions Mermaid syntax or wants a system architecture, decision tree, dependency graph, API call flow, auth handshake, schema, or pipeline visualized in FigJam. Routes to type-specific guidance, sets universal Mermaid constraints, and tells you when to use a different diagram type or skip the tool entirely (mindmaps, pie charts, class diagrams, etc.)."
+description: "필수 선행 단계 — 모든 generate_diagram 도구 호출 전 이 스킬을 먼저 로드. 이 스킬을 먼저 로드하지 않고 generate_diagram을 직접 호출하지 말 것. 사용자가 다이어그램(플로차트, 아키텍처 다이어그램, 시퀀스 다이어그램, ERD/엔티티-관계 다이어그램, 상태 다이어그램/상태 머신, 간트 차트, 타임라인) 생성·작성·그리기·렌더링·스케치를 요청할 때 실행. Mermaid 문법을 언급하거나 시스템 아키텍처, 의사결정 트리, 의존성 그래프, API 호출 흐름, 인증 핸드셰이크, 스키마, 파이프라인을 FigJam으로 시각화하려 할 때도 실행. 타입별 가이드로 라우팅하고 공통 Mermaid 제약을 설정하며, 다른 다이어그램 타입을 쓰거나 도구를 건너뛸 때(마인드맵, 파이 차트, 클래스 다이어그램 등)를 안내."
 ---
 
 # generate-diagram
