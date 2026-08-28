@@ -1,4 +1,5 @@
 ---
+name: skill-stocktake
 description: "Claude skill과 command의 품질을 감사할 때 사용. 순차적 subagent 배치 평가로 Quick Scan(변경된 skill만)과 Full Stocktake 모드를 지원."
 origin: ECC
 ---
