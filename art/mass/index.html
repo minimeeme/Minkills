@@ -1,0 +1,672 @@
+<title>Cobalt Mass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    color-scheme: dark;
+    --void:#050506;
+    --bone:#e8e6e1;
+    --dust:#6f737e;
+    --lit:#2f6bff;
+    --rim:#9dbcff;
+    --hair:rgba(232,230,225,.14);
+    --hair-lit:rgba(157,188,255,.42);
+    --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{
+    background:var(--void);
+    color:var(--bone);
+    font-family:var(--mono);
+    margin:0;
+    height:100svh;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--lit);color:#fff}
+  :focus-visible{outline:1px solid var(--rim);outline-offset:3px}
+
+  /* ---------- 표면 ---------- */
+  #stage{
+    position:fixed;
+    inset:0;
+    background:#000;
+    touch-action:none;
+    cursor:crosshair;
+  }
+  .scrim{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    transition:opacity .35s ease;
+    background:
+      linear-gradient(to bottom right, rgba(5,5,6,.80) 0%, rgba(5,5,6,0) 36%),
+      linear-gradient(to top right,    rgba(5,5,6,.78) 0%, rgba(5,5,6,0) 32%),
+      linear-gradient(to bottom left,  rgba(5,5,6,.62) 0%, rgba(5,5,6,0) 24%),
+      linear-gradient(to top left,     rgba(5,5,6,.58) 0%, rgba(5,5,6,0) 22%);
+  }
+  body.bare .scrim{opacity:0}
+  #surface{
+    display:block;
+    width:100%;
+    height:100%;
+    /* 필드 해상도로 그린 뒤 브라우저가 확대한다 — 프레임마다 리샘플하지 않는다 */
+    image-rendering:auto;
+  }
+
+  /* ---------- 인터페이스 ---------- */
+  .hud{
+    position:fixed;
+    z-index:5;
+    pointer-events:none;
+    transition:opacity .35s ease;
+  }
+  body.bare .hud{opacity:0;pointer-events:none!important}
+  .hud > *{pointer-events:auto}
+
+  .mark{top:0;left:0;padding:clamp(20px,3.2vw,40px);display:flex;flex-direction:column;gap:12px}
+  .mark h1{
+    margin:0;
+    font-family:var(--display);
+    font-variation-settings:"wdth" 122,"wght" 800;
+    font-size:clamp(30px,4.6vw,62px);
+    line-height:.84;
+    letter-spacing:-.015em;
+    text-transform:uppercase;
+  }
+  .mark h1 span{display:block}
+  .mark h1 .thin{font-variation-settings:"wdth" 122,"wght" 300;color:#b6c5e8}
+  .mark p{
+    margin:0;
+    max-width:27ch;
+    font-size:11.5px;
+    line-height:1.85;
+    letter-spacing:.02em;
+    color:#9d9fa8;
+  }
+
+  .tele{
+    top:0;right:0;
+    padding:clamp(20px,3.2vw,40px);
+    text-align:right;
+    font-size:10.5px;
+    letter-spacing:.18em;
+    line-height:1.9;
+    color:var(--dust);
+    font-variant-numeric:tabular-nums;
+    text-transform:uppercase;
+  }
+  .tele b{color:#a8aab3;font-weight:500}
+
+  .desk{
+    left:0;bottom:0;
+    padding:clamp(20px,3.2vw,40px);
+    width:min(340px,86vw);
+  }
+  .panel{
+    border:1px solid var(--hair);
+    background:rgba(5,5,6,.58);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    padding:16px 16px 14px;
+    display:flex;
+    flex-direction:column;
+    gap:13px;
+  }
+  .panel legend,.panel .cap{
+    font-size:9.5px;
+    letter-spacing:.26em;
+    text-transform:uppercase;
+    color:var(--dust);
+  }
+  .knob{display:flex;flex-direction:column;gap:6px}
+  .knob .row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-size:10.5px;
+    letter-spacing:.12em;
+    color:#b9bac1;
+  }
+  .knob .row i{font-style:normal;color:var(--rim);font-variant-numeric:tabular-nums}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;
+    width:100%;height:14px;background:transparent;margin:0;cursor:ew-resize;
+  }
+  input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--hair);}
+  input[type=range]::-moz-range-track{height:1px;background:var(--hair);}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;
+    width:9px;height:9px;margin-top:-4px;border-radius:0;
+    background:var(--rim);transition:background .2s,transform .2s;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:9px;height:9px;border:0;border-radius:0;background:var(--rim);
+  }
+  input[type=range]:hover::-webkit-slider-thumb,
+  input[type=range]:focus-visible::-webkit-slider-thumb{background:#fff;transform:scaleY(1.5)}
+  .acts{display:flex;gap:8px;padding-top:2px}
+  button{
+    flex:1;
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:#b9bac1;
+    background:transparent;
+    border:1px solid var(--hair);
+    padding:8px 6px;
+    cursor:pointer;
+    transition:color .2s,border-color .2s;
+  }
+  button:hover{color:var(--bone);border-color:var(--hair-lit)}
+
+  .hint{
+    right:0;bottom:0;
+    padding:clamp(20px,3.2vw,40px);
+    text-align:right;
+    font-size:10px;
+    letter-spacing:.16em;
+    line-height:2;
+    color:var(--dust);
+    text-transform:uppercase;
+  }
+  .hint kbd{
+    font-family:var(--mono);
+    color:var(--rim);
+    border:1px solid var(--hair);
+    padding:1px 5px;
+    font-size:9px;
+  }
+  .peek{
+    position:fixed;left:clamp(20px,3.2vw,40px);bottom:clamp(20px,3.2vw,40px);
+    z-index:6;display:none;
+    background:rgba(5,5,6,.66);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    padding:9px 16px;
+  }
+  body.bare .peek{display:block}
+
+  @media (max-width:720px){
+    .desk{width:100%}
+    .panel{padding:13px 14px 12px;gap:9px}
+    .knob{gap:4px}
+    .acts{gap:7px}
+    button{padding:10px 6px}
+    .hint{display:none}
+    .mark p{display:none}
+    .tele{font-size:9.5px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .hud{transition:none}
+  }
+</style>
+
+<div id="stage">
+  <canvas id="surface" aria-label="검은 공간에서 커서를 따라 부피가 쌓이고 빠지는 코발트 블루 네오프렌 덩어리"></canvas>
+  <div class="scrim"></div>
+</div>
+
+<div class="hud mark">
+  <h1><span>Cobalt</span><span class="thin">Mass</span></h1>
+  <p>표면 하나. 광원 하나. 사진이 아니라 매 프레임 계산되는 높이장입니다. 커서를 끌면 부피가 쌓이고, 손을 떼면 천천히 빠집니다.</p>
+</div>
+
+<div class="hud tele">
+  <div><b id="tRes">—</b> 높이장</div>
+  <div><b id="tFps">—</b> fps</div>
+  <div id="tMode">확산 대기</div>
+</div>
+
+<div class="hud desk">
+  <div class="panel">
+    <p class="cap">재료 조정</p>
+    <div class="knob">
+      <label class="row" for="kGloss">광택 <i id="vGloss">46</i></label>
+      <input id="kGloss" type="range" min="0" max="100" value="46">
+    </div>
+    <div class="knob">
+      <label class="row" for="kCrease">주름 <i id="vCrease">55</i></label>
+      <input id="kCrease" type="range" min="0" max="100" value="55">
+    </div>
+    <div class="knob">
+      <label class="row" for="kLight">광원 각도 <i id="vLight">235°</i></label>
+      <input id="kLight" type="range" min="0" max="359" value="235">
+    </div>
+    <div class="knob">
+      <label class="row" for="kHold">점성 <i id="vHold">62</i></label>
+      <input id="kHold" type="range" min="0" max="100" value="62">
+    </div>
+    <div class="acts">
+      <button id="bClear" type="button">비우기</button>
+      <button id="bHide" type="button">숨기기</button>
+    </div>
+  </div>
+</div>
+
+<div class="hud hint">
+  <div>드래그 — 부피 쌓기</div>
+  <div>더블클릭 — 한 덩어리</div>
+  <div><kbd>H</kbd> 인터페이스</div>
+</div>
+
+<button class="peek" id="bShow" type="button">인터페이스</button>
+
+<script>
+(function(){
+"use strict";
+var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var TAU = Math.PI*2;
+
+/* ============================================================
+   룩업 — 삼각함수, 색 사다리, 직물 그레인
+   ============================================================ */
+var SN = new Float32Array(1024);
+for (var q=0;q<1024;q++) SN[q] = Math.sin(q*TAU/1024);
+var SK = 1024/TAU, COS_OFF = 256;   /* cos(x) = SN[(x*SK|0 + 256) & 1023] */
+
+/* 네오프렌 색 사다리 — 가장 밝은 확산면조차 흰색에 닿지 않는다 */
+var STOPS = [
+  [0.00,   2,   4,  12],
+  [0.16,   6,  18,  54],
+  [0.38,  13,  42, 134],
+  [0.60,  28,  79, 216],
+  [0.80,  63, 123, 255],
+  [1.00, 157, 188, 255]
+];
+var LUT = new Float32Array(768);
+for (var i=0;i<256;i++){
+  var t=i/255, a=STOPS[0], b=STOPS[STOPS.length-1];
+  for (var s=0;s<STOPS.length-1;s++){
+    if (t>=STOPS[s][0] && t<=STOPS[s+1][0]) { a=STOPS[s]; b=STOPS[s+1]; break; }
+  }
+  var f=(t-a[0])/Math.max(1e-6,b[0]-a[0]);
+  LUT[i*3]   = a[1]+(b[1]-a[1])*f;
+  LUT[i*3+1] = a[2]+(b[2]-a[2])*f;
+  LUT[i*3+2] = a[3]+(b[3]-a[3])*f;
+}
+
+/* 미세 그레인 — 이것이 없으면 플라스틱으로 읽힌다 */
+var GN=256, GM=255, GS=GN*GN;
+var GX=new Float32Array(GS), GY=new Float32Array(GS);
+(function(){
+  var r=new Float32Array(GS), o=new Float32Array(GS), x, y, p;
+  for (var k=0;k<GS;k++) r[k]=Math.random();
+  for (p=0;p<2;p++){
+    for (y=0;y<GN;y++){
+      var yc=y*GN, yu=((y-1)&GM)*GN, yd=((y+1)&GM)*GN;
+      for (x=0;x<GN;x++){
+        o[yc+x]=(r[yc+x]*4 + r[yc+((x-1)&GM)] + r[yc+((x+1)&GM)] + r[yu+x] + r[yd+x])*0.125;
+      }
+    }
+    r.set(o);
+  }
+  for (y=0;y<GN;y++){
+    var yc2=y*GN, yu2=((y-1)&GM)*GN, yd2=((y+1)&GM)*GN;
+    for (x=0;x<GN;x++){
+      GX[yc2+x]=(r[yc2+((x-1)&GM)]-r[yc2+((x+1)&GM)])*9;
+      GY[yc2+x]=(r[yu2+x]-r[yd2+x])*9;
+    }
+  }
+})();
+
+/* ============================================================
+   재료 변수
+   ============================================================ */
+var mat = { gloss:0.55, crease:0.55, angle:235, hold:0.62 };
+var LX=0, LY=0, LZ=1, HX=0, HY=0, HZ=1;
+var BX=0, BY=0, BZ=1;
+function relight(){
+  var a = mat.angle*Math.PI/180, el = 0.72;
+  var ce = Math.cos(el);
+  LX = Math.cos(a)*ce; LY = Math.sin(a)*ce; LZ = Math.sin(el);
+  var bx=-LX, by=-LY, bz=0.42;
+  var bl=1/Math.sqrt(bx*bx+by*by+bz*bz);
+  BX=bx*bl; BY=by*bl; BZ=bz*bl;
+  var hx=LX, hy=LY, hz=LZ+1;
+  var hl=1/Math.sqrt(hx*hx+hy*hy+hz*hz);
+  HX=hx*hl; HY=hy*hl; HZ=hz*hl;
+}
+relight();
+
+/* ============================================================
+   높이장
+   ============================================================ */
+var cv = document.getElementById('surface');
+var ctx = cv.getContext('2d', {alpha:false});
+var FW=0, FH=0, QW=0, QH=0, N=0;
+var H=null, CLAY=null, TMPF=null, Q=null, TB=null, img=null, data=null;
+var cssW=0, cssH=0, scale=0, MINS=0.20, MAXS=0.46;
+
+function alloc(newFW, newFH, keep){
+  var oldW=FW, oldH=FH, oldClay=CLAY;
+  FW=newFW; FH=newFH; N=FW*FH;
+  QW=FW>>2; QH=FH>>2;
+  H=new Float32Array(N);
+  CLAY=new Float32Array(N);
+  TMPF=new Float32Array(N);
+  Q=new Float32Array(QW*QH);
+  TB=new Float32Array(QW*QH);
+  cv.width=FW; cv.height=FH;
+  img=ctx.createImageData(FW,FH);
+  data=img.data;
+  for (var k=3;k<data.length;k+=4) data[k]=255;
+  if (keep && oldClay && oldW>0){
+    /* 해상도가 바뀌어도 빚어둔 부피는 잃지 않는다 */
+    for (var y=0;y<FH;y++){
+      var sy=(y*oldH/FH)|0, sr=sy*oldW, dr=y*FW;
+      for (var x=0;x<FW;x++) CLAY[dr+x]=oldClay[sr+((x*oldW/FW)|0)];
+    }
+  }
+  document.getElementById('tRes').textContent = FW+' × '+FH;
+}
+
+function measure(){
+  var r = cv.getBoundingClientRect();
+  cssW = Math.max(1,r.width); cssH = Math.max(1,r.height);
+}
+function fit(keep){
+  measure();
+  /* 좁은 화면은 확대 배율이 크므로 필드를 더 촘촘히 잡는다 */
+  MAXS = cssW<600 ? 0.82 : (cssW<1100 ? 0.56 : 0.46);
+  if (!scale) scale = MAXS*0.85;
+  if (scale>MAXS) scale=MAXS; else if (scale<MINS) scale=MINS;
+  var w = Math.round(cssW*scale/4)*4;
+  if (w<160) w=160; else if (w>640) w=640;
+  var h = Math.round(w*cssH/cssW/4)*4;
+  if (h<120) h=120;
+  if (w!==FW || h!==FH) alloc(w,h,keep);
+}
+
+/* ---------- 주변의 느린 덩어리 ---------- */
+var seeds=[];
+for (var sd=0; sd<5; sd++){
+  seeds.push({ px:Math.random()*TAU, py:Math.random()*TAU,
+               sx:0.24+Math.random()*0.38, sy:0.26+Math.random()*0.42,
+               r:0.20+Math.random()*0.11, a:0.62+Math.random()*0.30 });
+}
+function splat(buf, cx, cy, r, amp, cap){
+  var r2=r*r;
+  var x0=(cx-r)|0, x1=(cx+r)|0, y0=(cy-r)|0, y1=(cy+r)|0;
+  if (x0<0) x0=0; if (y0<0) y0=0;
+  if (x1>FW-1) x1=FW-1; if (y1>FH-1) y1=FH-1;
+  for (var y=y0;y<=y1;y++){
+    var dy=y-cy, dy2=dy*dy, row=y*FW;
+    for (var x=x0;x<=x1;x++){
+      var dx=x-cx, d2=dx*dx+dy2;
+      if (d2>=r2) continue;
+      var f=1-d2/r2;
+      var v=buf[row+x]+f*f*amp;
+      buf[row+x] = cap && v>cap ? cap : v;
+    }
+  }
+}
+
+/* ============================================================
+   한 프레임
+   ============================================================ */
+function frame(t){
+  var i, x, y;
+
+  /* 1 — 빚어둔 부피는 스스로 눌러앉고(이완) 천천히 빠진다(감쇠) */
+  var decay = 0.930 + mat.hold*0.066;
+  var cw = 1.1 + mat.hold*4.2, cn = 1/(2+cw);
+  for (y=0;y<FH;y++){
+    var r1=y*FW;
+    for (x=0;x<FW;x++){
+      i=r1+x;
+      TMPF[i]=(CLAY[x>0?i-1:i] + CLAY[i]*cw + CLAY[x<FW-1?i+1:i])*cn;
+    }
+  }
+  for (y=0;y<FH;y++){
+    var r2=y*FW, u0=y>0?-FW:0, d0=y<FH-1?FW:0;
+    for (x=0;x<FW;x++){
+      i=r2+x;
+      var c=(TMPF[i+u0] + TMPF[i]*cw + TMPF[i+d0])*cn*decay;
+      CLAY[i]=c; H[i]=c;
+    }
+  }
+
+  /* 2 — 주변의 덩어리 */
+  var S = FW<FH ? FW : FH;
+  for (i=0;i<seeds.length;i++){
+    var sd=seeds[i];
+    splat(H, (0.5+0.30*Math.sin(t*0.30*sd.sx+sd.px))*FW,
+             (0.5+0.26*Math.sin(t*0.30*sd.sy+sd.py))*FH,
+             sd.r*S*1.02, sd.a, 0);
+  }
+
+  /* 3 — 부피 위에 접힘을 새기고, 같은 순회에서 사분해상도 평균을 모은다 */
+  Q.fill(0);
+  var cfx = 25.0/FW, cfy = cfx*0.66;
+  var camp = mat.crease*0.62, wt = t*0.24;
+  for (y=0;y<FH;y++){
+    var row=y*FW, qrow=(y>>2)*QW, uy=y*cfy;
+    var warpY = SN[((uy*0.9+wt)*SK|0)&1023]*1.4;
+    for (x=0;x<FW;x++){
+      i=row+x;
+      var hh=H[i];
+      if (hh>0.02){
+        var ux=x*cfx;
+        var u = ux + warpY;
+        var v = uy + SN[((ux*0.38-wt*0.8)*SK|0)&1023]*1.7;
+        var g1 = u+v*0.6;
+        var c1 = 0.5+0.5*SN[((g1*SK|0)+COS_OFF)&1023];
+        var c2 = 0.5+0.5*SN[(((g1*2.7+1.9)*SK|0)+COS_OFF)&1023];
+        var cc = c1*c1*0.76 + c2*c2*0.24;
+        var m = hh*3.1; if (m>1) m=1;
+        hh += (cc-0.30)*camp*m;
+        if (hh<0) hh=0;
+        H[i]=hh;
+      }
+      Q[qrow+(x>>2)] += hh;
+    }
+  }
+
+  /* 4 — 곡률에서 뽑은 가림 — 골을 눌러 앉힌다 */
+  for (y=0;y<QH;y++){
+    var r0=y*QW;
+    for (x=0;x<QW;x++){
+      TB[r0+x] = ( Q[r0+(x>1?x-2:0)] + Q[r0+(x>0?x-1:0)] + Q[r0+x]
+                 + Q[r0+(x<QW-1?x+1:QW-1)] + Q[r0+(x<QW-2?x+2:QW-1)] ) * 0.0125;
+    }
+  }
+  for (y=0;y<QH;y++){
+    var q0=y*QW;
+    var u2=(y>1?y-2:0)*QW, u1=(y>0?y-1:0)*QW;
+    var d1=(y<QH-1?y+1:QH-1)*QW, d2=(y<QH-2?y+2:QH-1)*QW;
+    for (x=0;x<QW;x++){
+      Q[q0+x] = (TB[u2+x]+TB[u1+x]+TB[q0+x]+TB[d1+x]+TB[d2+x])*0.2;
+    }
+  }
+
+  /* 5 — 조명 */
+  var SLOPE = FW*0.160, GA = 0.105, AOK = 0.78;
+  var gl = mat.gloss*1.35;
+  var d = data;
+  for (y=0;y<FH;y++){
+    var rw=y*FW, up=y>0?-FW:0, dn=y<FH-1?FW:0;
+    var gr=(y&GM)<<8;
+    var fy=(y-1.5)*0.25, iy=fy<0?0:(fy|0), ty=fy-iy;
+    if (ty<0) ty=0;
+    if (iy>QH-2){ iy=QH-2; ty=1; }
+    var qA=iy*QW, qB=qA+QW, ity=1-ty;
+    for (x=0;x<FW;x++){
+      i=rw+x;
+      var o=i<<2;
+      var h0=H[i];
+      if (h0<=0.006){ d[o]=1; d[o+1]=1; d[o+2]=3; continue; }
+      var gi=gr+(x&GM);
+      var ddx=(H[x>0?i-1:i]-H[x<FW-1?i+1:i])*SLOPE + GX[gi]*GA;
+      var ddy=(H[i+up]-H[i+dn])*SLOPE + GY[gi]*GA;
+      var inv=1/Math.sqrt(ddx*ddx+ddy*ddy+1);
+      var nx=ddx*inv, ny=ddy*inv, nz=inv;
+
+      var w=(nx*LX+ny*LY+nz*LZ+0.32)*0.75757;
+      if (w<0) w=0; else if (w>1) w=1;
+      var diff=w*w*(1.5-0.5*w);
+
+      var bw=nx*BX+ny*BY+nz*BZ;
+      if (bw>0) diff += bw*bw*0.115;
+
+      var fr=1-nz; fr*=fr; fr*=fr;
+
+      var fx=(x-1.5)*0.25, ix=fx<0?0:(fx|0), tx=fx-ix;
+      if (tx<0) tx=0;
+      if (ix>QW-2){ ix=QW-2; tx=1; }
+      var itx=1-tx;
+      var qv=(Q[qA+ix]*itx+Q[qA+ix+1]*tx)*ity + (Q[qB+ix]*itx+Q[qB+ix+1]*tx)*ty;
+      var ao=0.96+(h0-qv)*AOK;
+      if (ao<0.55) ao=0.55; else if (ao>1.14) ao=1.14;
+
+      var mk=h0*3.846; if (mk>1) mk=1;
+      mk=mk*mk*(3-2*mk);
+
+      var vv=(diff*0.92+fr*0.26)*ao*mk;
+      var ci=vv<=0?0:vv>=1?765:((vv*255)|0)*3;
+
+      var sp=0;
+      var ndh=nx*HX+ny*HY+nz*HZ;
+      if (ndh>0 && gl>0){
+        var s2=ndh*ndh, s4=s2*s2, s8=s4*s4;
+        sp=(s8*0.46 + s4*0.20)*gl*mk*(0.30+0.70*w);
+      }
+      var cr=LUT[ci]+sp*222, cg=LUT[ci+1]+sp*234, cb=LUT[ci+2]+sp*255;
+      d[o]  = cr>255?255:cr;
+      d[o+1]= cg>255?255:cg;
+      d[o+2]= cb>255?255:cb;
+    }
+  }
+  ctx.putImageData(img,0,0);
+}
+
+/* ============================================================
+   손 — 커서, 그리고 아무도 없을 때의 자율 운동
+   ============================================================ */
+var ptr = {x:0, y:0, has:false, down:false, lx:0, ly:0, last:-9};
+var stage = document.getElementById('stage');
+var modeEl = document.getElementById('tMode');
+
+function toField(e){
+  var r=cv.getBoundingClientRect();
+  return { x:(e.clientX-r.left)/r.width*FW, y:(e.clientY-r.top)/r.height*FH };
+}
+function knead(x0,y0,x1,y1,amp){
+  var R=(FW<FH?FW:FH)*0.115;
+  var dx=x1-x0, dy=y1-y0;
+  var dist=Math.sqrt(dx*dx+dy*dy);
+  var steps=Math.ceil(dist/(R*0.30));
+  if (steps<1) steps=1; else if (steps>26) steps=26;
+  for (var s=1;s<=steps;s++){
+    splat(CLAY, x0+dx*s/steps, y0+dy*s/steps, R, amp/steps*2.0, 1.7);
+  }
+}
+stage.addEventListener('pointermove', function(e){
+  if (!FW) return;
+  var p=toField(e);
+  if (ptr.has) knead(ptr.lx, ptr.ly, p.x, p.y, ptr.down?0.19:0.085);
+  ptr.lx=p.x; ptr.ly=p.y; ptr.has=true; ptr.last=clock;
+});
+stage.addEventListener('pointerdown', function(e){
+  var p=toField(e);
+  ptr.lx=p.x; ptr.ly=p.y; ptr.has=true; ptr.down=true; ptr.last=clock;
+  splat(CLAY, p.x, p.y, (FW<FH?FW:FH)*0.10, 0.30, 1.7);
+  if (stage.setPointerCapture) { try { stage.setPointerCapture(e.pointerId); } catch(err){} }
+});
+window.addEventListener('pointerup', function(){ ptr.down=false; });
+stage.addEventListener('pointerleave', function(){ ptr.has=false; ptr.down=false; });
+stage.addEventListener('pointercancel', function(){ ptr.has=false; ptr.down=false; });
+stage.addEventListener('dblclick', function(e){
+  var p=toField(e);
+  splat(CLAY, p.x, p.y, (FW<FH?FW:FH)*0.26, 0.95, 1.9);
+  ptr.last=clock;
+});
+
+var ghost={x:0,y:0};
+function autonomous(t){
+  ghost.x = (0.5+0.27*Math.sin(t*0.24)+0.09*Math.sin(t*0.61))*FW;
+  ghost.y = (0.5+0.22*Math.sin(t*0.35+1.1)+0.08*Math.cos(t*0.53))*FH;
+  return ghost;
+}
+
+/* ============================================================
+   조작판
+   ============================================================ */
+function knob(id, out, fmt, set){
+  var el=document.getElementById(id), lab=document.getElementById(out);
+  function apply(){ var v=+el.value; lab.textContent=fmt(v); set(v); }
+  el.addEventListener('input', apply);
+  apply();
+}
+knob('kGloss','vGloss', function(v){return v;},            function(v){ mat.gloss=v/100; });
+knob('kCrease','vCrease',function(v){return v;},            function(v){ mat.crease=v/100; });
+knob('kLight','vLight',  function(v){return v+'°';},        function(v){ mat.angle=v; relight(); });
+knob('kHold','vHold',    function(v){return v;},            function(v){ mat.hold=v/100; });
+
+document.getElementById('bClear').addEventListener('click', function(){ if (CLAY) CLAY.fill(0); });
+function bare(on){
+  document.body.classList.toggle('bare', on);
+  document.getElementById('bHide').textContent = on ? '보이기' : '숨기기';
+}
+document.getElementById('bHide').addEventListener('click', function(){ bare(true); });
+document.getElementById('bShow').addEventListener('click', function(){ bare(false); });
+window.addEventListener('keydown', function(e){
+  if (e.target && /INPUT|BUTTON/.test(e.target.tagName)) return;
+  var k=e.key.toLowerCase();
+  if (k==='h') bare(!document.body.classList.contains('bare'));
+  else if (k==='c' && CLAY) CLAY.fill(0);
+});
+
+/* ============================================================
+   루프 — 프레임 시간을 보고 높이장 해상도를 스스로 조정한다
+   ============================================================ */
+var clock=0, base=performance.now(), prevSec=0;
+if (REDUCED) modeEl.textContent='정지 — 커서로만';
+var acc=0, accN=0, fpsAcc=0, fpsN=0, fpsAt=0;
+var fpsEl=document.getElementById('tFps');
+
+fit(false);
+window.addEventListener('resize', function(){
+  clearTimeout(window.__rz);
+  window.__rz=setTimeout(function(){ fit(true); }, 150);
+});
+
+function loop(now){
+  var sec=(now-base)/1000;
+  var dt=sec-prevSec; prevSec=sec;
+  if (dt>0.5) dt=0.016;
+  if (!REDUCED) clock+=dt;
+
+  if (!ptr.has && !REDUCED && clock-ptr.last>2.6){
+    var g0={x:ghost.x, y:ghost.y};
+    var g=autonomous(clock);
+    if (g0.x) knead(g0.x, g0.y, g.x, g.y, 0.030);
+    if (modeEl.textContent!=='자율 운동') modeEl.textContent='자율 운동';
+  } else if (modeEl.textContent!=='커서 추적' && ptr.has){
+    modeEl.textContent='커서 추적';
+  }
+
+  var t0=performance.now();
+  frame(clock+3.0);
+  var cost=performance.now()-t0;
+
+  acc+=cost; accN++;
+  if (accN>=45){
+    var avg=acc/accN; acc=0; accN=0;
+    if (avg>13 && scale>MINS){ scale=Math.max(MINS, scale*0.88); fit(true); }
+    else if (avg<6 && scale<MAXS){ scale=Math.min(MAXS, scale*1.07); fit(true); }
+  }
+  fpsN++;
+  if (now-fpsAt>500){
+    fpsAcc=Math.round(fpsN*1000/(now-fpsAt));
+    fpsEl.textContent=fpsAcc;
+    fpsN=0; fpsAt=now;
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+})();
+</script>
