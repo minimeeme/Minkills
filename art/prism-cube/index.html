@@ -25,14 +25,16 @@
   .hud{position:fixed;pointer-events:none;z-index:5}
   .hud > *{pointer-events:auto}
 
-  #top{top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:18px 20px;gap:16px}
+  #top{top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:18px 20px 34px;gap:16px;
+    background:linear-gradient(to bottom, rgba(5,3,11,.72), rgba(5,3,11,0))}
   .mark{font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--dim);line-height:1.9}
   .mark b{display:block;font-size:15px;letter-spacing:.22em;color:var(--ink);font-weight:600}
   .stats{display:flex;gap:22px;text-align:right;font-variant-numeric:tabular-nums}
   .stat span{display:block;font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
   .stat b{font-size:19px;font-weight:500;letter-spacing:.02em}
 
-  #bottom{left:0;right:0;bottom:0;padding:16px 20px 22px;display:flex;flex-direction:column;gap:14px;align-items:center}
+  #bottom{left:0;right:0;bottom:0;padding:26px 20px 22px;display:flex;flex-direction:column;gap:14px;align-items:center;
+    background:linear-gradient(to top, rgba(5,3,11,.88) 40%, rgba(5,3,11,0))}
   .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
   button{
     font:inherit;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
@@ -122,6 +124,7 @@
     <div class="sl"><label for="sShim">요동</label><input id="sShim" type="range" min="0" max="100" value="78"><output id="oShim">78</output></div>
     <div class="sl"><label for="sFlow">흐름</label><input id="sFlow" type="range" min="0" max="100" value="55"><output id="oFlow">55</output></div>
     <div class="sl"><label for="sSpeed">회전속도</label><input id="sSpeed" type="range" min="20" max="100" value="62"><output id="oSpeed">62</output></div>
+    <div class="sl"><label for="sTint">면 색</label><input id="sTint" type="range" min="0" max="100" value="18"><output id="oTint">18</output></div>
   </div>
   <div class="row">
     <button id="bScramble" class="key">섞기</button>
@@ -426,7 +429,7 @@ var VS = [
 var FS = [
 'precision highp float;',
 'varying vec3 vN; varying vec3 vT; varying vec3 vW; varying vec2 vUv; varying float vF; varying float vS;',
-'uniform vec3 uEye; uniform float uTime; uniform float uShim; uniform float uFlow;',
+'uniform vec3 uEye; uniform float uTime; uniform float uShim; uniform float uFlow; uniform float uTint;',
 
 'float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453123); }',
 'float vnoise(vec2 p){',
@@ -489,9 +492,9 @@ var FS = [
 '  float face  = vF - 10.0*inner;',
 
 // ---- holographic surface -------------------------------------------------
-'  float t   = uTime * (0.08 + 0.40*uFlow);',
+'  float t   = uTime * (0.20 + 1.05*uFlow);',
 '  float sd2 = vS * 29.0;',
-'  float fam = abs(fract(vS*1.85 + uTime*0.011*uFlow)*2.0 - 1.0);',
+'  float fam = abs(fract(vS*1.85 + uTime*0.030*uFlow)*2.0 - 1.0);',
 '  vec2  q   = p * 1.30;',
 
 // domain warp -> liquid chrome flow
@@ -518,33 +521,38 @@ var FS = [
 
 // thin-film phase -> oil-slick wash over the chrome
 '  float phase = 4.10*ndvp + 2.55*h0 + 0.9*w1 + t*0.58 + vS*6.283;',
-'  float baseHue = faceHue(face) + uTime * 0.010 * uShim;',
-'  float wander  = uShim * (0.085*sin(phase) + 0.050*(h0-0.5));',
-'  float hue = baseHue + wander;',
-'  float split = 0.05 + 0.09*uShim;',
+'  float baseHue = faceHue(face) + uTime * 0.017 * uShim;',
+// the streak hue sweeps a full cycle across each tile, so every face carries the
+// same white ground with the same rainbow running over it — the identity below
+// is the only thing that separates them
+'  float sweep = 1.25*ndvp + 1.15*h0 + 0.45*w1 + t*0.09 + vS;',
+'  float hue = sweep + uShim * (0.10*sin(phase) + 0.05*(h0-0.5));',
+'  float split = 0.026 + 0.034*uShim;',
 '  vec3 slick = vec3(spectrum(hue - split).r, spectrum(hue).g, spectrum(hue + split).b);',
 
-// silver first: the reflection is mostly neutral, iridescence only modulates it
-'  vec3 silver = mix(vec3(dot(chrome, vec3(0.299,0.587,0.114))), chrome, 0.26);',
-'  float ir = 0.22 + 0.30*uShim;',
-'  vec3 col = silver * (1.0 + (slick - 0.5) * 1.30 * ir);',
+// The reference is a neutral silver ground; the rainbow only rides the creases.
+// Dispersion is therefore weighted by how hard the surface is bending here.
+'  vec3 silver = mix(vec3(dot(chrome, vec3(0.299,0.587,0.114))), chrome, 0.10) * 1.22;',
+'  float bend = clamp(length(vec2(h0-hx, h0-hy)) * 11.0, 0.0, 1.0);',
+'  float ir = (0.085 + 0.62*bend) * (0.62 + 0.52*uShim);',
+'  vec3 col = silver * (1.0 + (slick - 0.5) * ir);',
 
 // identity cast — the one thing you can actually sort the cube by.
 // it drifts a little so a glance is never enough, but the ordering never inverts.
 '  float tintHue = baseHue + uShim * 0.045 * sin(t*0.29 + vS*6.0);',
 '  vec3  tintC = pastel(tintHue);',
 '  vec3  chroma = tintC / max(dot(tintC, vec3(0.3333)), 0.001);',
-'  col *= mix(vec3(1.0), chroma, 0.44 - 0.10*uShim);',
+'  col *= mix(vec3(1.0), chroma, uTint);',
 
 // specular glints
 '  vec3 L1 = normalize(vec3(-0.40, 0.88, 0.58));',
 '  vec3 L2 = normalize(vec3(0.72, 0.30, -0.52));',
 '  vec3 H1 = normalize(L1 + V), H2 = normalize(L2 + V);',
 '  col += vec3(1.0,0.99,0.97) * pow(max(dot(Np,H1),0.0), 60.0) * 1.30;',
-'  col += mix(vec3(1.0), slick, 0.6) * pow(max(dot(Np,H2),0.0), 24.0) * 0.55;',
+'  col += mix(vec3(1.0), slick, 0.30) * pow(max(dot(Np,H2),0.0), 24.0) * 0.60;',
 
 // rim: prismatic edge catch
-'  col += mix(vec3(0.80,0.86,1.0), slick, 0.55) * fresP * (0.26 + 0.24*uShim);',
+'  col += mix(vec3(0.88,0.92,1.0), slick, 0.42) * fresP * (0.24 + 0.22*uShim);',
 '  col += vec3(0.34,0.40,0.54) * fres * 0.22;',
 
 // tone
@@ -577,38 +585,64 @@ var BG_VS = [
 var BG_FS = [
 'precision highp float;',
 'varying vec2 vP;',
-'uniform float uTime; uniform float uAsp;',
-'float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453123); }',
-'float vnoise(vec2 p){',
-'  vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.0-2.0*f);',
-'  return mix(mix(hash(i),hash(i+vec2(1.0,0.0)),u.x), mix(hash(i+vec2(0.0,1.0)),hash(i+vec2(1.0,1.0)),u.x), u.y);',
-'}',
-'float fbm(vec2 p){',
-'  float s=0.0, a=0.5;',
-'  for(int i=0;i<3;i++){ s+=a*vnoise(p); p=p*2.11+vec2(1.3,-2.7); a*=0.5; }',
-'  return s;',
-'}',
+'uniform float uTime; uniform float uAsp; uniform float uPx;',
+
 'void main(){',
 '  vec2 p = vec2(vP.x*uAsp, vP.y);',
-'  float t = uTime * 0.055;',
-// slow domain warp -> the light and dark bands drift and fold
-'  float w1 = fbm(p*0.75 + vec2(t*0.55, -t*0.30));',
-'  float w2 = fbm(p*0.75 + vec2(-t*0.42, t*0.36) + 4.2);',
-'  vec2  q  = p + 1.45*vec2(w1-0.5, w2-0.5);',
-'  float b1 = 0.5 + 0.5*sin(q.x*1.25 + q.y*1.85 - t*1.20);',
-'  float b2 = 0.5 + 0.5*sin(q.x*2.45 - q.y*1.15 + t*0.85 + 2.1);',
-'  float b3 = 0.5 + 0.5*sin(length(q + vec2(0.6,-0.3))*1.05 - t*0.62);',
-'  float band = b1*0.50 + b2*0.28 + b3*0.22;',
-'  float lum  = pow(band, 1.8)*0.92 + w1*0.30;',
-// stays dark: the cube has to remain the brightest thing on screen
-'  vec3 col = mix(vec3(0.018,0.021,0.031), vec3(0.190,0.208,0.276), lum);',
-// crests pick up a whisper of the same prismatic family as the cube
-'  col += vec3(0.052,0.030,0.070) * pow(b1, 6.0);',
-'  col += vec3(0.018,0.046,0.052) * pow(b2, 6.0);',
-'  col += vec3(0.012,0.020,0.026) * pow(1.0-band, 4.0);',
-'  float r = length(p);',
-'  col *= 1.0 - 0.42*smoothstep(0.45, 1.75, r);',
-'  gl_FragColor = vec4(col, 1.0);',
+'  float HZ = 0.16;',                       // horizon height in NDC
+'  vec3 col;',
+
+// ── sky ──────────────────────────────────────────────────────────────────
+'  float up = clamp((p.y - HZ) / (1.0 - HZ), 0.0, 1.0);',
+'  vec3 sky = mix(vec3(0.196,0.075,0.243), vec3(0.043,0.031,0.110), pow(up, 0.72));',
+'  sky += vec3(0.130,0.035,0.098) * pow(1.0 - up, 5.0);',
+
+// ── the sun, sitting on the horizon off to the right ──────────────────────
+'  vec2  sc = vec2(uAsp*0.58, HZ);',
+'  float R  = 0.30 + 0.11*uAsp;',
+'  vec2  sv = (p - sc) / R;',
+'  float sr = length(sv);',
+'  float disc = smoothstep(1.0, 0.975, sr);',
+// vertical ramp: amber at the base, magenta at the crown
+'  float sy = clamp(sv.y*0.5 + 0.5, 0.0, 1.0);',
+'  vec3 sunC = mix(vec3(1.00,0.62,0.16), vec3(0.98,0.22,0.52), pow(sy, 0.85));',
+// scanline slits, widening toward the bottom the way the poster art does
+// slits across the lower half of the disc, thinning as they climb
+'  float q = clamp(sv.y, 0.0, 1.0);',
+'  float g = fract(q * 9.0);',
+'  float thick = mix(0.58, 0.0, smoothstep(0.0, 0.62, q));',
+'  disc *= step(thick, g);',
+'  sky = mix(sky, sunC, disc);',
+'  sky += sunC * 0.30 * exp(-max(sr - 1.0, 0.0) * 5.2);',   // glow
+
+// ── floor: a perspective grid. Adding to the world coordinate slides the
+//    lines right to left, and the shift on screen is 1/depth, so motion falls
+//    to zero at the vanishing point.
+'  float below = HZ - p.y;',
+'  if(below <= 0.0){',
+'    col = sky;',
+'  } else {',
+'    float H  = 3.0;',                                // eye height above the deck
+'    float d  = H / max(below, 1e-4);',               // depth
+'    float wx = p.x * d + uTime * 0.72;',             // lateral world coord, sliding
+'    float lx = abs(fract(wx + 0.5) - 0.5);',         // world distance to nearest line
+'    float lz = abs(fract(d  + 0.5) - 0.5);',
+'    float w  = 2.4 * uPx;',
+'    float gx = 1.0 - smoothstep(0.0, w, lx / d);',           // screen width of the line
+'    float gz = 1.0 - smoothstep(0.0, w, H * lz / (d*d));',
+'    float grid = max(gx, gz);',
+'    float fade = exp(-d * 0.035);',                  // distant lines dissolve into haze
+'    grid *= fade;',
+'    vec3 gc = mix(vec3(0.36,0.97,1.00), vec3(0.92,0.34,1.00), clamp(d*0.030, 0.0, 1.0));',
+'    vec3 floorC = mix(vec3(0.062,0.022,0.098), vec3(0.020,0.010,0.045), clamp(d*0.020, 0.0, 1.0));',
+'    floorC += sunC * 0.22 * exp(-abs(p.x - sc.x)*1.15) * fade;',  // sun laid out on the deck
+'    col = floorC + gc * grid * 0.66;',
+'    col += vec3(0.58,0.22,0.66) * exp(-below*7.0) * 0.95;',       // horizon haze
+'  }',
+
+'  if(p.y >= HZ) col = sky;',
+'  col *= 1.0 - 0.34*smoothstep(0.55, 1.85, length(p));',
+'  gl_FragColor = vec4(col*0.78, 1.0);',
 '}'].join('\n');
 
 var bgProg = gl.createProgram();
@@ -619,6 +653,7 @@ if(!gl.getProgramParameter(bgProg, gl.LINK_STATUS)) throw new Error(gl.getProgra
 var bgLocP = gl.getAttribLocation(bgProg,'aP');
 var bgTime = gl.getUniformLocation(bgProg,'uTime');
 var bgAsp  = gl.getUniformLocation(bgProg,'uAsp');
+var bgPx   = gl.getUniformLocation(bgProg,'uPx');
 var bgBuf  = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, bgBuf);
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
@@ -633,6 +668,7 @@ var uEye = gl.getUniformLocation(prog,'uEye');
 var uTime = gl.getUniformLocation(prog,'uTime');
 var uShim = gl.getUniformLocation(prog,'uShim');
 var uFlow = gl.getUniformLocation(prog,'uFlow');
+var uTint = gl.getUniformLocation(prog,'uTint');
 
 var bufPos = gl.createBuffer(), bufNrm = gl.createBuffer(), bufTan = gl.createBuffer(), bufSta = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, bufSta); gl.bufferData(gl.ARRAY_BUFFER, aStatic, gl.STATIC_DRAW);
@@ -824,8 +860,8 @@ function resolveFaceDrag(hit, dscreen){
 var moves = 0, scrambled = false, running = false, t0 = 0, elapsed = 0, active = false;
 var els = {
   tTime: document.getElementById('tTime'), tMoves: document.getElementById('tMoves'),
-  sShim: document.getElementById('sShim'), sFlow: document.getElementById('sFlow'), sSpeed: document.getElementById('sSpeed'),
-  oShim: document.getElementById('oShim'), oFlow: document.getElementById('oFlow'), oSpeed: document.getElementById('oSpeed'),
+  sShim: document.getElementById('sShim'), sFlow: document.getElementById('sFlow'), sSpeed: document.getElementById('sSpeed'), sTint: document.getElementById('sTint'),
+  oShim: document.getElementById('oShim'), oFlow: document.getElementById('oFlow'), oSpeed: document.getElementById('oSpeed'), oTint: document.getElementById('oTint'),
   win: document.getElementById('win'), wTime: document.getElementById('wTime'), wMoves: document.getElementById('wMoves'),
   toast: document.getElementById('toast')
 };
@@ -936,7 +972,7 @@ document.getElementById('bView').onclick = function(){ viewT.yaw = -0.62; viewT.
 document.getElementById('bAgain').onclick = function(){ scramble(); };
 document.getElementById('bClose').onclick = function(){ els.win.classList.remove('on'); };
 
-[['sShim','oShim'],['sFlow','oFlow'],['sSpeed','oSpeed']].forEach(function(pair){
+[['sShim','oShim'],['sFlow','oFlow'],['sSpeed','oSpeed'],['sTint','oTint']].forEach(function(pair){
   var s = els[pair[0]], o = els[pair[1]];
   s.addEventListener('input', function(){ o.textContent = s.value; });
 });
@@ -983,6 +1019,7 @@ function frame(now){
   bindBg();
   gl.uniform1f(bgTime, clock);
   gl.uniform1f(bgAsp, canvas.width/canvas.height);
+  gl.uniform1f(bgPx, 2.0/canvas.height);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
   gl.enable(gl.DEPTH_TEST);
 
@@ -994,6 +1031,7 @@ function frame(now){
   gl.uniform1f(uTime, clock);
   gl.uniform1f(uShim, (+els.sShim.value)/100);
   gl.uniform1f(uFlow, (+els.sFlow.value)/100);
+  gl.uniform1f(uTint, (+els.sTint.value)/100 * 0.62);
   gl.drawArrays(gl.TRIANGLES, 0, NVERT);
 
   requestAnimationFrame(frame);
