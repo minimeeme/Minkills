@@ -31,14 +31,14 @@
 사이트 카드에 그대로 들어가는 문구입니다.
 
 > 표면이 한 번도 같은 적이 없었던 큐브입니다.
-> 색이 아닌 질감으로 맞추다 보면
-> 어디서 온 조각인지 알아낼 수 있을거에요.
+> 색을 외워서는 맞출 수 없습니다.
+> 질감에만 집중해 어디서 온 조각인지 기억하세요.
 
 영문:
 
 > A cube whose surface has never once been the same.
-> Match it by texture instead of colour, and
-> you will work out where each piece came from.
+> Memorising colours will not solve it.
+> Follow the texture alone, and remember where each piece came from.
 
 ## 설명 (국문)
 
