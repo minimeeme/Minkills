@@ -10,6 +10,9 @@
 | 썸네일 4:3 · 2400×1800 | `thumbnail.png` |
 | 썸네일 1:1 · 2000×2000 | `thumbnail-square.png` |
 
+썸네일은 HUD를 숨기고 큐브를 화면 정가운데에 놓고 찍습니다 — 평소에는 아래 컨트롤을
+피해 조금 올라가 있지만, 컨트롤이 없는 스틸에서는 그럴 이유가 없습니다.
+
 `index.html`은 라이브러리도 이미지도 참조하지 않는 단일 파일입니다. 그대로 복사해
 `/art/prism-cube/index.html` 같은 경로에 두고 링크하거나 iframe으로 임베드하면 됩니다.
 
@@ -23,9 +26,19 @@
 `index.html` 안에 data URI로 넣었습니다. 전체 8종 합쳐 약 65 KB이고, 외부 요청이 없습니다.
 조작 안내는 한 번 읽고 나면 잊히는 줄이라, 나머지보다 작고 조용한 얼굴을 씁니다.
 
-## 한 줄 소개
+## 소개글
 
-표면이 멈추지 않는 홀로그램 큐브. 여섯 면이 같은 은빛이라, 맞추는 일이 색을 외우는 일이 아니게 됩니다.
+사이트 카드에 그대로 들어가는 문구입니다.
+
+> 표면이 한 번도 같은 적이 없었던 큐브입니다.
+> 색이 아닌 질감으로 맞추다 보면
+> 어디서 온 조각인지 알아낼 수 있을거에요.
+
+영문:
+
+> A cube whose surface has never once been the same.
+> Match it by texture instead of colour, and
+> you will work out where each piece came from.
 
 ## 설명 (국문)
 
@@ -76,6 +89,7 @@ Built in raw WebGL — no libraries, no images, one file.
   | `X` `C` `V` | 앞 | 가운데 | 뒤 |
 - `Space` 섞기 · `Z` 되돌리기 · `Y` 다시 실행
 - 컨트롤: Scramble / Undo / Redo / Reset / Recenter
+- 오른쪽 위 `Minjifolio ↗` → 포트폴리오로 돌아가기 (다른 작업들과 같은 자리·같은 모양)
 
 ## 기술
 
