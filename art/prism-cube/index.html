@@ -47,11 +47,21 @@
   .hud{position:fixed;pointer-events:none;z-index:5}
   .hud > *{pointer-events:auto}
 
-  #top{top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:18px 20px 34px;gap:16px;
+  #top{top:0;left:0;right:0;display:flex;justify-content:flex-start;align-items:flex-start;padding:18px 20px 34px;gap:16px;
     background:linear-gradient(to bottom, rgba(238,239,242,.86), rgba(238,239,242,0))}
   .mark{font-size:11px;font-weight:300;letter-spacing:.24em;color:var(--dim);line-height:1.7}
   .mark b{display:block;font-family:var(--display);font-size:34px;line-height:1.05;letter-spacing:.06em;
     color:var(--ink);font-weight:700;margin-bottom:6px}
+  /* The way back to the portfolio. The offsets are the other pieces' verbatim,
+     so the link lands on the same pixel from page to page; the clock and move
+     count stack underneath it. */
+  .topright{
+    position:fixed;right:clamp(1.2rem,5vw,3.5rem);top:calc(2.4rem + env(safe-area-inset-top));
+    display:flex;flex-direction:column;align-items:flex-end;gap:20px;
+  }
+  .backlink{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--dim);text-decoration:none;transition:color .2s ease}
+  .backlink:hover,.backlink:focus-visible{color:var(--ink)}
   .stats{display:flex;gap:22px;text-align:right;font-variant-numeric:tabular-nums}
   .stat span{display:block;font-size:9.5px;font-weight:300;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin-bottom:5px}
   .stat b{font-size:21px;font-weight:600;letter-spacing:.02em}
@@ -122,9 +132,12 @@
 
 <div class="hud" id="top">
   <div class="mark"><b>PRISM CUBE</b>A Swimming Surface</div>
-  <div class="stats">
-    <div class="stat"><span>Time</span><b id="tTime">0:00</b></div>
-    <div class="stat"><span>Moves</span><b id="tMoves">0</b></div>
+  <div class="topright">
+    <a class="backlink" href="../">Minjifolio ↗</a>
+    <div class="stats">
+      <div class="stat"><span>Time</span><b id="tTime">0:00</b></div>
+      <div class="stat"><span>Moves</span><b id="tMoves">0</b></div>
+    </div>
   </div>
 </div>
 
@@ -1347,11 +1360,24 @@ if(/[?&]debug/.test(location.search)){
     zoom: function(){ return { z:zoom, target:zoomT, dist:view.dist, base:baseDist,
                                lo:Math.max(ZOOM_IN, zoomFloor()), hi:ZOOM_OUT, decoFront:DECO_FRONT }; },
     setZoom: function(z){ zoomT = clampZoom(z); },
+    center: function(){ cyFrac = 0; },      // for stills shot with the HUD hidden
     deco: function(){ return DECO.map(function(D){ return { p:D.p.slice(), follow:+D.follow.toFixed(4), z:+D.depth.toFixed(3) }; }); },
     orbit: function(y,pi){ viewT.yaw = y; viewT.pitch = pi; },
     flags: function(){ return { scrambled:scrambled, active:active, moves:moves, anim:!!anim }; }
   };
 }
+
+// the home link goes BACK when we came from the portfolio, so the page
+// returns to where the visitor left off instead of the top
+(function(){
+  var back = document.querySelector('.backlink');
+  if(back) back.addEventListener('click', function(e){
+    if(history.length > 1 && document.referrer.indexOf(location.origin) === 0){
+      e.preventDefault();
+      history.back();
+    }
+  });
+})();
 
 syncControls();
 resize();
