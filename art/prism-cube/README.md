@@ -33,11 +33,9 @@
 
 일반적인 큐브라면 면마다 색이 정해져 있습니다. 이 큐브는 여섯 면이 같은 흰 바탕을 씁니다.
 색을 외워서 맞추는 방식이 통하지 않고, 조각이 어디서 왔는지를 기억해야 합니다.
-화면 아래 **면 색** 값을 올리면 면마다 옅은 색조가 돌아와 난이도가 내려갑니다.
 
 면을 끌면 그 층이 돌고, 빈 곳을 끌면 큐브 전체가 돕니다.
-**요동**은 표면이 흔들리는 폭을, **흐름**은 녹아내리는 속도를, **회전속도**는 층이 도는 시간을 정합니다.
-여섯 면이 다시 하나가 되면 걸린 시간과 수가 남습니다.
+휠이나 핀치로 조금 당기고 밀 수 있습니다. 여섯 면이 다시 하나가 되면 걸린 시간과 수가 남습니다.
 
 ## Description (EN)
 
@@ -47,23 +45,24 @@ Nothing is a texture map: every surface is computed per frame, so no two moments
 
 An ordinary cube assigns a colour to each face. This one gives all six the same white ground,
 which removes colour memory from the solve and leaves only the question of where a piece came
-from. The **면 색 / face tint** control brings the identity back when you want it easier.
+from.
 
-Drag a face to turn that layer, drag empty space to orbit. Built in raw WebGL — no libraries,
-no images, one file.
+Drag a face to turn that layer, drag empty space to orbit, scroll or pinch to pull in a little.
+Built in raw WebGL — no libraries, no images, one file.
 
 ## 화면
 
 큐브 주변으로 그라디언트 도형들이 서로 다른 깊이에서 천천히 헤엄칩니다.
 큐브보다 뒤에 있는 것은 큐브에 가려지고, 옆에 있는 것은 지나갑니다.
+확대·축소하면 가까운 도형이 먼 도형보다 크게 벌어져, 깊이가 눈에 보입니다.
 
 ## 조작
 
 - 면 드래그 → 그 층 회전 · 빈 공간 드래그 → 큐브 전체 회전
+- 휠 · 핀치 → 확대·축소 (`+` `−` 키도 같음)
 - `U` `D` `L` `R` `F` `B` 회전, `Shift`+키 반대 방향
 - `Space` 섞기 · `Z` 되돌리기 · `Y` 다시 실행
-- 컨트롤: 섞기 / 되돌리기 / 다시 실행 / 초기화 / 시점 리셋
-- 슬라이더: 요동 · 흐름 · 회전속도 · 면 색
+- 컨트롤: Scramble / Undo / Redo / Reset / Recenter
 
 ## 기술
 
@@ -72,6 +71,8 @@ Canvas WebGL 1.0, 단일 파일, 외부 의존성 없음.
 여섯 방향의 바깥 스티커를 직접 읽습니다. 피킹은 모델 공간에서의 광선/상자 교차로 풀고,
 드래그 방향을 화면에 투영한 네 접선과 맞춰 어느 시점에서도 같은 층이 돌아갑니다.
 `prefers-reduced-motion`에서는 표면 시계가 멈추고 조작만 남습니다.
+확대·축소 범위는 눈대중이 아니라 장면에서 계산합니다 — 큐브의 바운딩 스피어가 화면을
+벗어나지 않는 거리와, 배경 도형 중 가장 앞선 것의 깊이에서 확보할 여유를 함께 봅니다.
 
 ## 크레딧
 

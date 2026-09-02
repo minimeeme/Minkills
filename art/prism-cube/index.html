@@ -69,17 +69,6 @@
   button:disabled{color:rgba(24,27,36,.26);cursor:default}
   button:disabled::after{display:none}
 
-  .sliders{display:flex;gap:26px;flex-wrap:wrap;justify-content:center;padding:2px 0}
-  .sl{display:flex;align-items:center;gap:10px}
-  .sl label{font-size:10px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
-  .sl output{font-size:10.5px;color:var(--dim);width:2.4em;text-align:right;font-variant-numeric:tabular-nums}
-  input[type=range]{-webkit-appearance:none;appearance:none;width:104px;height:20px;background:transparent;cursor:pointer}
-  input[type=range]::-webkit-slider-runnable-track{height:2px;background:rgba(24,27,36,.20);border-radius:2px}
-  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;
-    background:var(--accent);margin-top:-4.5px;box-shadow:0 1px 4px rgba(24,27,36,.28)}
-  input[type=range]::-moz-range-track{height:2px;background:rgba(24,27,36,.20);border-radius:2px}
-  input[type=range]::-moz-range-thumb{width:11px;height:11px;border:0;border-radius:50%;background:var(--accent)}
-
   #help{font-size:11px;font-weight:300;color:var(--dim);letter-spacing:.05em;text-align:center;line-height:2;max-width:760px}
   #help kbd{font:inherit;font-size:10.5px;letter-spacing:.12em;color:var(--ink);
     border-bottom:1px solid var(--line);padding:0 2px 1px;margin:0 3px}
@@ -115,8 +104,6 @@
     .stat b{font-size:16px}
     .stats{gap:14px}
     #help{display:none}
-    .sliders{gap:12px;padding:10px 12px}
-    input[type=range]{width:78px}
     button{padding:9px 13px;font-size:10.5px;letter-spacing:.12em}
   }
 </style>
@@ -126,7 +113,7 @@
 <div id="stage"><canvas id="gl"></canvas></div>
 
 <div class="hud" id="top">
-  <div class="mark"><b>PRISM CUBE</b>표면이 계속 변합니다</div>
+  <div class="mark"><b>PRISM CUBE</b>A Swimming Surface</div>
   <div class="stats">
     <div class="stat"><span>Time</span><b id="tTime">0:00</b></div>
     <div class="stat"><span>Moves</span><b id="tMoves">0</b></div>
@@ -135,21 +122,15 @@
 
 <div class="hud" id="bottom">
   <div id="help">
-    면을 드래그하면 그 층이 돌아갑니다 · 빈 공간을 드래그하면 큐브 전체가 돌아갑니다<br>
-    <kbd>U</kbd><kbd>D</kbd><kbd>L</kbd><kbd>R</kbd><kbd>F</kbd><kbd>B</kbd> 회전 · <kbd>Shift</kbd>+키 반대 · <kbd>Space</kbd> 섞기 · <kbd>Z</kbd> 되돌리기 · <kbd>Y</kbd> 다시 실행
-  </div>
-  <div class="sliders">
-    <div class="sl"><label for="sShim">요동</label><input id="sShim" type="range" min="0" max="100" value="57"><output id="oShim">57</output></div>
-    <div class="sl"><label for="sFlow">흐름</label><input id="sFlow" type="range" min="0" max="100" value="45"><output id="oFlow">45</output></div>
-    <div class="sl"><label for="sSpeed">회전속도</label><input id="sSpeed" type="range" min="20" max="100" value="40"><output id="oSpeed">40</output></div>
-    <div class="sl"><label for="sTint">면 색</label><input id="sTint" type="range" min="0" max="100" value="0"><output id="oTint">0</output></div>
+    면을 드래그하면 그 층이 돌아갑니다 · 빈 공간을 드래그하면 큐브 전체가 돌아갑니다 · 휠·핀치로 확대·축소<br>
+    <kbd>U</kbd><kbd>D</kbd><kbd>L</kbd><kbd>R</kbd><kbd>F</kbd><kbd>B</kbd> 회전 · <kbd>Shift</kbd>+키 반대 · <kbd>Space</kbd> 섞기 · <kbd>Z</kbd> 되돌리기 · <kbd>Y</kbd> 다시 실행 · <kbd>+</kbd><kbd>−</kbd> 확대·축소
   </div>
   <div class="row">
-    <button id="bScramble" class="key">섞기</button>
-    <button id="bUndo">되돌리기</button>
-    <button id="bRedo">다시 실행</button>
-    <button id="bReset">초기화</button>
-    <button id="bView">시점 리셋</button>
+    <button id="bScramble" class="key">Scramble</button>
+    <button id="bUndo">Undo</button>
+    <button id="bRedo">Redo</button>
+    <button id="bReset">Reset</button>
+    <button id="bView">Recenter</button>
   </div>
 </div>
 
@@ -171,6 +152,15 @@
 <script>
 (function(){
 "use strict";
+
+// ════════════════════════════════════════════════════════════ tuning
+// These four used to be sliders. The values are the ones they were left on,
+// so the piece looks and moves exactly as before — there is just nothing to
+// drag any more.
+var SHIM    = 0.57;    // how far the surface heaves
+var FLOW    = 0.45;    // how fast it melts
+var TURN_MS = 476;     // one layer turn, before the ease
+var TINT    = 0.00;    // per-face hue; 0 keeps all six the same silver
 
 // ════════════════════════════════════════════════════════════ math
 function mIdent(){ return new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]); }
@@ -263,7 +253,7 @@ function applyTurn(axis, layer, dir){
 
 function startTurn(axis, layer, dir, record, fast){
   if(anim) { queue.push([axis,layer,dir,record,fast]); return; }
-  var base = 620 - 3.6*(+els.sSpeed.value);   // 40 -> ~476ms
+  var base = TURN_MS;
   anim = { axis:axis, layer:layer, dir:dir, t:0, dur: fast? Math.max(48, base*0.42) : base, record:record };
 }
 
@@ -820,12 +810,41 @@ gl.clearColor(0.027,0.031,0.047,1);
 var FOV = 38*Math.PI/180;
 var view = { yaw:-0.62, pitch:0.52, dist:8.6, cy:0 };
 var viewT = { yaw:-0.62, pitch:0.52 };
+
+// Zoom rides on top of the fitted distance rather than replacing it, so the
+// framing stays correct at every window size. The pull-in stop is computed
+// from the scene, not picked by eye: the cube must not burst the frame, and
+// the eye must not reach the shallowest drifting shape. Those shapes sit at
+// fixed world depths, so moving the eye parallaxes them against the cube —
+// that separation is the point of allowing zoom at all, and it is also what
+// bounds it.
+var ZOOM_IN = 0.84, ZOOM_OUT = 1.26;     // deliberately shallow: a little, not a lot
+var DECO_FRONT = (function(){            // shallowest z any shape reaches
+  var z = -Infinity;
+  for(var i=0;i<DECO.length;i++) z = Math.max(z, DECO[i].p[2] + Math.abs(DECO[i].amp[2]));
+  return z;
+})();
+var baseDist = 8.6, cyFrac = 0, zoom = 1, zoomT = 1;
+
+function zoomFloor(){
+  var ty = Math.tan(FOV/2);
+  var byCube = (1.5*GAP*Math.sqrt(3) + 0.10) / ty * 0.72;   // corners may crop a touch
+  var byDeco = DECO_FRONT + 4.0;                            // clearance ahead of the nearest shape
+  return Math.max(byCube, byDeco) / baseDist;
+}
+function clampZoom(z){
+  return Math.min(ZOOM_OUT, Math.max(Math.max(ZOOM_IN, zoomFloor()), z));
+}
+function nudgeZoom(k){ zoomT = clampZoom(zoomT * k); }
 var modelM = mIdent(), mvpM = mIdent(), vpM = mIdent(), projM = mIdent(), viewM = mIdent();
 var eye = [0,0,8.6];
 
 function updateCamera(){
   view.yaw   += (viewT.yaw - view.yaw) * 0.10;
   view.pitch += (viewT.pitch - view.pitch) * 0.10;
+  zoom       += (zoomT - zoom) * 0.11;
+  view.dist   = baseDist * zoom;
+  view.cy     = view.dist * cyFrac;
   modelM = mMul(mRot(1, view.yaw), mIdent(), new Float32Array(16));
   modelM = mMul(mRot(0, view.pitch), modelM, new Float32Array(16));
   eye = [0, view.cy, view.dist];
@@ -846,10 +865,11 @@ function resize(){
   // fit the cube's bounding sphere, then leave room for the HUD strip at the bottom
   var r  = 1.5*GAP*Math.sqrt(3) + 0.10;                // bounding sphere: never clips, whatever the orbit
   var ty = Math.tan(FOV/2);
-  var hud = W < 640 ? 215 : 175;                       // css px of controls under the cube
+  var hud = W < 640 ? 150 : 152;                       // css px of controls under the cube
   var vFrac = Math.max(0.45, (H - hud) / H);
-  view.dist = Math.max(r/(ty*vFrac), r/(ty*asp));
-  view.cy   = -(hud/H) * view.dist * ty * 0.42;        // lift the cube clear of the controls
+  baseDist = Math.max(r/(ty*vFrac), r/(ty*asp));
+  cyFrac   = -(hud/H) * ty * 0.42;                     // lift the cube clear of the controls
+  zoomT    = clampZoom(zoomT);                         // the stop moves with the framing
 
   projM = mPersp(FOV, asp, 0.1, 100);
 }
@@ -905,6 +925,13 @@ function projectPt(p){
 
 // ════════════════════════════════════════════════════════════ input
 var drag = null;
+var live = {}, nLive = 0, pinch = null;    // every pointer currently down
+
+function pinchSpan(){
+  var ids = Object.keys(live);
+  var a = live[ids[0]], b = live[ids[1]];
+  return Math.hypot(a[0]-b[0], a[1]-b[1]);
+}
 function ptr(e){
   var r = canvas.getBoundingClientRect();
   return [ e.clientX - r.left, e.clientY - r.top ];
@@ -916,12 +943,28 @@ canvas.addEventListener('pointerdown', function(e){
   canvas.classList.add('dragging');
   els.win.classList.remove('on');
   var pt = ptr(e);
+  if(!(e.pointerId in live)) nLive++;
+  live[e.pointerId] = pt;
+  if(nLive === 2){
+    // a second finger turns the gesture into a pinch — drop the drag before it
+    // can resolve into a layer turn the user did not mean
+    drag = null;
+    pinch = { span: pinchSpan() || 1, z0: zoomT };
+    return;
+  }
+  if(nLive > 2) return;
   var hit = (e.shiftKey || anim) ? null : pick(pt[0], pt[1]);
   drag = { mode: hit ? 'face' : 'orbit', start: pt, last: pt, hit: hit,
            yaw0: viewT.yaw, pitch0: viewT.pitch, done:false };
 });
 
 canvas.addEventListener('pointermove', function(e){
+  if(e.pointerId in live) live[e.pointerId] = ptr(e);
+  if(pinch){
+    var span = pinchSpan();
+    if(span > 1) zoomT = clampZoom(pinch.z0 * (pinch.span / span));
+    return;
+  }
   if(!drag) return;
   var pt = ptr(e);
   if(drag.mode === 'orbit'){
@@ -937,6 +980,8 @@ canvas.addEventListener('pointermove', function(e){
 });
 
 function endDrag(e){
+  if(e && (e.pointerId in live)){ delete live[e.pointerId]; nLive = Math.max(0, nLive-1); }
+  if(nLive < 2) pinch = null;
   if(!drag) return;
   if(drag.mode==='face' && !drag.done){
     // a tap on the cube: nothing, but keeps orientation stable
@@ -979,8 +1024,6 @@ function resolveFaceDrag(hit, dscreen){
 var moves = 0, scrambled = false, running = false, t0 = 0, elapsed = 0, active = false;
 var els = {
   tTime: document.getElementById('tTime'), tMoves: document.getElementById('tMoves'),
-  sShim: document.getElementById('sShim'), sFlow: document.getElementById('sFlow'), sSpeed: document.getElementById('sSpeed'), sTint: document.getElementById('sTint'),
-  oShim: document.getElementById('oShim'), oFlow: document.getElementById('oFlow'), oSpeed: document.getElementById('oSpeed'), oTint: document.getElementById('oTint'),
   win: document.getElementById('win'), wTime: document.getElementById('wTime'), wMoves: document.getElementById('wMoves'),
   bUndo: document.getElementById('bUndo'), bRedo: document.getElementById('bRedo'),
   toast: document.getElementById('toast')
@@ -1113,22 +1156,26 @@ window.addEventListener('keydown', function(e){
   if(k==='arrowright'){ viewT.yaw += 0.28; }
   if(k==='arrowup'){ viewT.pitch -= 0.24; }
   if(k==='arrowdown'){ viewT.pitch += 0.24; }
+  if(k==='+' || k==='=') { nudgeZoom(0.92); }
+  if(k==='-' || k==='_') { nudgeZoom(1/0.92); }
 });
 
 document.getElementById('bScramble').onclick = scramble;
 document.getElementById('bReset').onclick = reset;
 document.getElementById('bUndo').onclick = undo;
 document.getElementById('bRedo').onclick = redo;
-document.getElementById('bView').onclick = function(){ viewT.yaw = -0.62; viewT.pitch = 0.52; };
+document.getElementById('bView').onclick = function(){ viewT.yaw = -0.62; viewT.pitch = 0.52; zoomT = 1; };
 document.getElementById('bAgain').onclick = function(){ scramble(); };
 document.getElementById('bClose').onclick = function(){ els.win.classList.remove('on'); };
 
-[['sShim','oShim'],['sFlow','oFlow'],['sSpeed','oSpeed'],['sTint','oTint']].forEach(function(pair){
-  var s = els[pair[0]], o = els[pair[1]];
-  s.addEventListener('input', function(){ o.textContent = s.value; });
-});
+canvas.addEventListener('wheel', function(e){
+  e.preventDefault();
+  // normalise the three deltaModes so a trackpad and a notched wheel feel alike
+  var d = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1);
+  nudgeZoom(Math.exp(Math.max(-60, Math.min(60, d)) * 0.0016));
+}, {passive:false});
 
-canvas.addEventListener('dblclick', function(){ viewT.yaw = -0.62; viewT.pitch = 0.52; });
+canvas.addEventListener('dblclick', function(){ viewT.yaw = -0.62; viewT.pitch = 0.52; zoomT = 1; });
 canvas.addEventListener('contextmenu', function(e){ e.preventDefault(); });
 
 // ════════════════════════════════════════════════════════════ loop
@@ -1182,9 +1229,9 @@ function frame(now){
   gl.uniformMatrix4fv(uModel, false, modelM);
   gl.uniform3fv(uEye, new Float32Array(eye));
   gl.uniform1f(uTime, clock);
-  gl.uniform1f(uShim, (+els.sShim.value)/100);
-  gl.uniform1f(uFlow, (+els.sFlow.value)/100);
-  gl.uniform1f(uTint, (+els.sTint.value)/100 * 0.62);
+  gl.uniform1f(uShim, SHIM);
+  gl.uniform1f(uFlow, FLOW);
+  gl.uniform1f(uTint, TINT);
   gl.drawArrays(gl.TRIANGLES, 0, NVERT);
 
   // decoration last: depth-tested against the cube so it can pass behind it,
@@ -1217,6 +1264,9 @@ if(/[?&]debug/.test(location.search)){
     move: function(a,l,d){ pushMove(a,l,d); },
     pickAt: function(x,y){ return pick(x,y); },
     lastMove: null,
+    zoom: function(){ return { z:zoom, target:zoomT, dist:view.dist, base:baseDist,
+                               lo:Math.max(ZOOM_IN, zoomFloor()), hi:ZOOM_OUT, decoFront:DECO_FRONT }; },
+    setZoom: function(z){ zoomT = clampZoom(z); },
     flags: function(){ return { scrambled:scrambled, active:active, moves:moves, anim:!!anim }; }
   };
 }
