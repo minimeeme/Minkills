@@ -20,12 +20,6 @@
   #stage{position:fixed;inset:0}
   canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
   canvas.dragging{cursor:grabbing}
-  #glow{
-    position:fixed;inset:0;pointer-events:none;
-    background:
-      radial-gradient(120% 80% at 50% 8%, rgba(120,150,255,.10), transparent 60%),
-      radial-gradient(90% 70% at 50% 108%, rgba(255,150,220,.07), transparent 60%);
-  }
 
   /* ---------- HUD ---------- */
   .hud{position:fixed;pointer-events:none;z-index:5}
@@ -110,7 +104,6 @@
 <body>
 
 <div id="stage"><canvas id="gl"></canvas></div>
-<div id="glow"></div>
 
 <div class="hud" id="top">
   <div class="mark"><b>PRISM CUBE</b>표면이 계속 변합니다</div>
@@ -278,73 +271,130 @@ function isSolved(){
 }
 
 // ════════════════════════════════════════════════════════════ geometry
-// per cubie: 6 quads. static attrs (uv, faceId, seed), dynamic attrs (pos, normal)
-var CUB = 0.98, GAP = 1.0, HALF = CUB/2;
-var VPF = 6, VPC = 6*VPF, NVERT = 26*VPC;
+// Each cubie is a rounded box: the surface sits at distance RAD from an inner
+// box, which gives exact normals and a chamfered edge that shades like a curve.
+// Neighbours touch (CUB === GAP), so the grid reads as carved grooves rather
+// than drawn black lines.
+// Cubies stay just inside their cell — overlapping them would put neighbouring
+// faces in the same plane and z-fight. What shows in the carved groove is an
+// inner face, and those inherit the cubie's sticker hue (see fillStatic), so the
+// edge reads as a shaded fold of the same colour instead of a black slot.
+var CUB = 0.99, GAP = 1.0, HALF = CUB/2;
+var RAD = 0.12;                                  // chamfer radius
+var INNER = HALF - RAD;
+// sample positions per axis: the outer segment spans exactly the rounded shoulder
+var US = [-1, -INNER/HALF, 0, INNER/HALF, 1];
+var SEG = US.length - 1;
+var VPF = SEG*SEG*6, VPC = 6*VPF, NVERT = 26*VPC;
 
 var aStatic = new Float32Array(NVERT*4);   // u,v,faceId,seed
 var aPos    = new Float32Array(NVERT*3);
 var aNrm    = new Float32Array(NVERT*3);
 var aTan    = new Float32Array(NVERT*3);
-var quadLocal = [];   // per face: 6 verts of local positions + normal + tangent
+
+// one cubie's local geometry, shared by all 26
+var LPOS = new Float32Array(VPC*3);
+var LNRM = new Float32Array(VPC*3);
+var LTAN = new Float32Array(VPC*3);
+var LUV  = new Float32Array(VPC*2);
+var LFACE = new Uint8Array(VPC);
 
 (function buildLocal(){
-  var q = [[0,0],[1,0],[1,1], [0,0],[1,1],[0,1]];
-  for(var f=0;f<6;f++){
-    var n=FACE_N[f], u=FACE_U[f], v=FACE_V[f], verts=[];
-    for(var i=0;i<6;i++){
-      var a=(q[i][0]*2-1)*HALF, b=(q[i][1]*2-1)*HALF;
-      verts.push([ n[0]*HALF+u[0]*a+v[0]*b, n[1]*HALF+u[1]*a+v[1]*b, n[2]*HALF+u[2]*a+v[2]*b ]);
-    }
-    quadLocal.push({ n:n, t:u, verts:verts, uvs:q });
-  }
-})();
+  var o3 = 0, o2 = 0, o1 = 0;
+  var corners = [[0,0],[1,0],[1,1], [0,0],[1,1],[0,1]];
+  for(var f=0; f<6; f++){
+    var n = FACE_N[f], U = FACE_U[f], V = FACE_V[f];
+    for(var gy=0; gy<SEG; gy++) for(var gx=0; gx<SEG; gx++){
+      for(var ci=0; ci<6; ci++){
+        var u = US[gx + corners[ci][0]], v = US[gy + corners[ci][1]];
+        // point on the sharp cube, then pushed onto the rounded surface
+        var px = n[0]*HALF + U[0]*u*HALF + V[0]*v*HALF;
+        var py = n[1]*HALF + U[1]*u*HALF + V[1]*v*HALF;
+        var pz = n[2]*HALF + U[2]*u*HALF + V[2]*v*HALF;
+        var ix = clamp(px, -INNER, INNER), iy = clamp(py, -INNER, INNER), iz = clamp(pz, -INNER, INNER);
+        var dx = px-ix, dy = py-iy, dz = pz-iz;
+        var L = Math.hypot(dx,dy,dz) || 1;
+        var nx = dx/L, ny = dy/L, nz = dz/L;
 
-(function fillStatic(){
-  var o=0;
-  for(var ci=0; ci<26; ci++){
-    var c = cubies[ci];
-    for(var f=0; f<6; f++){
-      var fid = c.col[f] < 0 ? 6 : c.col[f];
-      var sd  = (Math.sin(ci*12.9898 + f*78.233)*43758.5453) % 1;
-      sd = sd < 0 ? sd+1 : sd;
-      for(var i=0;i<6;i++){
-        aStatic[o++] = quadLocal[f].uvs[i][0];
-        aStatic[o++] = quadLocal[f].uvs[i][1];
-        aStatic[o++] = fid;
-        aStatic[o++] = sd;
+        LPOS[o3]   = ix + nx*RAD; LPOS[o3+1] = iy + ny*RAD; LPOS[o3+2] = iz + nz*RAD;
+        LNRM[o3]   = nx;          LNRM[o3+1] = ny;          LNRM[o3+2] = nz;
+        // tangent: the face's u axis, made perpendicular to the smooth normal
+        var d = U[0]*nx + U[1]*ny + U[2]*nz;
+        var tx = U[0]-nx*d, ty = U[1]-ny*d, tz = U[2]-nz*d;
+        var tl = Math.hypot(tx,ty,tz) || 1;
+        LTAN[o3] = tx/tl; LTAN[o3+1] = ty/tl; LTAN[o3+2] = tz/tl;
+        o3 += 3;
+
+        LUV[o2] = u*0.5+0.5; LUV[o2+1] = v*0.5+0.5; o2 += 2;
+        LFACE[o1++] = f;
       }
     }
   }
 })();
 
+function fillStatic(){
+  var o = 0;
+  for(var ci=0; ci<26; ci++){
+    var c = cubies[ci];
+    var rep = 0;                                  // this cubie's own colour
+    for(var k=0; k<6; k++) if(c.col[k] >= 0){ rep = c.col[k]; break; }
+    for(var v=0; v<VPC; v++){
+      var f = LFACE[v];
+      var sd = (Math.sin(ci*12.9898 + f*78.233)*43758.5453) % 1;
+      if(sd < 0) sd += 1;
+      aStatic[o++] = LUV[v*2];
+      aStatic[o++] = LUV[v*2+1];
+      // 0-5 = sticker, +10 = inner face carrying the same hue, dimmed
+      aStatic[o++] = c.col[f] < 0 ? rep + 10 : c.col[f];
+      aStatic[o++] = sd;
+    }
+  }
+}
+fillStatic();
+
 function updateGeometry(){
-  var o3=0, i, f, k, c;
-  var animR = null;
+  var animR = null, aAxis = 0, aLayer = 0;
   if(anim){
     var e = anim.t/anim.dur; e = e<0?0:(e>1?1:e);
     e = e<0.5 ? 4*e*e*e : 1-Math.pow(-2*e+2,3)/2;   // easeInOutCubic
     animR = mRot(anim.axis, anim.dir*e*Math.PI/2);
+    aAxis = anim.axis; aLayer = anim.layer;
   }
-  for(i=0;i<26;i++){
-    c = cubies[i];
-    var moving = animR && c.p[anim.axis] === anim.layer;
-    var cx=c.p[0]*GAP, cy=c.p[1]*GAP, cz=c.p[2]*GAP;
-    for(f=0;f<6;f++){
-      var ql = quadLocal[f];
-      var nw = xf3(c.o, ql.n);
-      var tw = xf3(c.o, ql.t);
-      if(moving){ nw = xf3(animR, nw); tw = xf3(animR, tw); }
-      for(k=0;k<6;k++){
-        var lp = ql.verts[k];
-        var p = xf3(c.o, lp);
-        p[0]+=cx; p[1]+=cy; p[2]+=cz;
-        if(moving) p = xf3(animR, p);
-        aPos[o3]=p[0]; aPos[o3+1]=p[1]; aPos[o3+2]=p[2];
-        aNrm[o3]=nw[0]; aNrm[o3+1]=nw[1]; aNrm[o3+2]=nw[2];
-        aTan[o3]=tw[0]; aTan[o3+1]=tw[1]; aTan[o3+2]=tw[2];
-        o3+=3;
-      }
+  for(var i=0; i<26; i++){
+    var c = cubies[i], o = c.o;
+    // rotation rows of the cubie
+    var r00=o[0], r01=o[4], r02=o[8],
+        r10=o[1], r11=o[5], r12=o[9],
+        r20=o[2], r21=o[6], r22=o[10];
+    var tx = c.p[0]*GAP, ty = c.p[1]*GAP, tz = c.p[2]*GAP;
+
+    if(animR && c.p[aAxis] === aLayer){        // premultiply by the in-flight turn
+      var a00=animR[0], a01=animR[4], a02=animR[8],
+          a10=animR[1], a11=animR[5], a12=animR[9],
+          a20=animR[2], a21=animR[6], a22=animR[10];
+      var b00=a00*r00+a01*r10+a02*r20, b01=a00*r01+a01*r11+a02*r21, b02=a00*r02+a01*r12+a02*r22;
+      var b10=a10*r00+a11*r10+a12*r20, b11=a10*r01+a11*r11+a12*r21, b12=a10*r02+a11*r12+a12*r22;
+      var b20=a20*r00+a21*r10+a22*r20, b21=a20*r01+a21*r11+a22*r21, b22=a20*r02+a21*r12+a22*r22;
+      r00=b00; r01=b01; r02=b02; r10=b10; r11=b11; r12=b12; r20=b20; r21=b21; r22=b22;
+      var nx = a00*tx+a01*ty+a02*tz, ny = a10*tx+a11*ty+a12*tz, nz = a20*tx+a21*ty+a22*tz;
+      tx=nx; ty=ny; tz=nz;
+    }
+
+    var base = i*VPC*3;
+    for(var v=0; v<VPC; v++){
+      var k = v*3, w = base + k;
+      var lx = LPOS[k], ly = LPOS[k+1], lz = LPOS[k+2];
+      aPos[w]   = r00*lx + r01*ly + r02*lz + tx;
+      aPos[w+1] = r10*lx + r11*ly + r12*lz + ty;
+      aPos[w+2] = r20*lx + r21*ly + r22*lz + tz;
+      lx = LNRM[k]; ly = LNRM[k+1]; lz = LNRM[k+2];
+      aNrm[w]   = r00*lx + r01*ly + r02*lz;
+      aNrm[w+1] = r10*lx + r11*ly + r12*lz;
+      aNrm[w+2] = r20*lx + r21*ly + r22*lz;
+      lx = LTAN[k]; ly = LTAN[k+1]; lz = LTAN[k+2];
+      aTan[w]   = r00*lx + r01*ly + r02*lz;
+      aTan[w+1] = r10*lx + r11*ly + r12*lz;
+      aTan[w+2] = r20*lx + r21*ly + r22*lz;
     }
   }
 }
@@ -392,6 +442,21 @@ var FS = [
 'vec3 spectrum(float t){',
 '  return 0.5 + 0.5*cos(6.28318*(t + vec3(0.0, 0.33, 0.67)));',
 '}',
+// pastel version — high value, low saturation, the register the reference sits in
+'vec3 pastel(float t){',
+'  return 0.70 + 0.30*cos(6.28318*(t + vec3(0.0, 0.33, 0.67)));',
+'}',
+// the six face identities, sampled off the reference sheet rather than spread
+// evenly round the wheel: peach, chartreuse, mint, aqua, periwinkle, rose
+'float faceHue(float f){',
+'  float h = 0.085;',
+'  h = mix(h, 0.250, step(0.5, f));',
+'  h = mix(h, 0.420, step(1.5, f));',
+'  h = mix(h, 0.535, step(2.5, f));',
+'  h = mix(h, 0.690, step(3.5, f));',
+'  h = mix(h, 0.885, step(4.5, f));',
+'  return h;',
+'}',
 // studio environment: overhead softbox, cool bounce, warm floor, a couple of strip lights
 'vec3 env(vec3 d){',
 '  float up = d.y*0.5 + 0.5;',
@@ -417,18 +482,11 @@ var FS = [
 '  float ndv = clamp(dot(N,V), 0.0, 1.0);',
 '  float fres = pow(1.0 - ndv, 3.2);',
 
-// rounded-square sticker mask
+// no drawn frame — the carved groove between cubies is the grid.
+// inner faces run the same material, dimmed, so a sliver reads as shadow.
 '  vec2 p = vUv*2.0 - 1.0;',
-'  vec2 dq = abs(p) - vec2(0.845);',
-'  float sd = length(max(dq, 0.0)) + min(max(dq.x, dq.y), 0.0) - 0.11;',
-'  float sticker = smoothstep(0.030, -0.012, sd);',
-
-// body (plastic frame + inner faces)
-'  vec3 body = vec3(0.028,0.031,0.040);',
-'  body += vec3(0.30,0.34,0.44) * fres * 0.55;',
-'  body += vec3(0.05) * smoothstep(0.16, 0.0, abs(sd));',
-
-'  if(vF > 5.5){ gl_FragColor = vec4(body, 1.0); return; }',
+'  float inner = step(9.5, vF);',
+'  float face  = vF - 10.0*inner;',
 
 // ---- holographic surface -------------------------------------------------
 '  float t   = uTime * (0.08 + 0.40*uFlow);',
@@ -460,7 +518,7 @@ var FS = [
 
 // thin-film phase -> oil-slick wash over the chrome
 '  float phase = 4.10*ndvp + 2.55*h0 + 0.9*w1 + t*0.58 + vS*6.283;',
-'  float baseHue = vF * (1.0/6.0) + 0.03 + uTime * 0.010 * uShim;',
+'  float baseHue = faceHue(face) + uTime * 0.010 * uShim;',
 '  float wander  = uShim * (0.085*sin(phase) + 0.050*(h0-0.5));',
 '  float hue = baseHue + wander;',
 '  float split = 0.05 + 0.09*uShim;',
@@ -468,14 +526,15 @@ var FS = [
 
 // silver first: the reflection is mostly neutral, iridescence only modulates it
 '  vec3 silver = mix(vec3(dot(chrome, vec3(0.299,0.587,0.114))), chrome, 0.26);',
-'  float ir = 0.26 + 0.32*uShim;',
+'  float ir = 0.22 + 0.30*uShim;',
 '  vec3 col = silver * (1.0 + (slick - 0.5) * 1.30 * ir);',
 
 // identity cast — the one thing you can actually sort the cube by.
 // it drifts a little so a glance is never enough, but the ordering never inverts.
 '  float tintHue = baseHue + uShim * 0.045 * sin(t*0.29 + vS*6.0);',
-'  vec3  tintC = spectrum(tintHue);',
-'  col *= 1.0 + (tintC - 0.5) * (0.60 - 0.13*uShim);',
+'  vec3  tintC = pastel(tintHue);',
+'  vec3  chroma = tintC / max(dot(tintC, vec3(0.3333)), 0.001);',
+'  col *= mix(vec3(1.0), chroma, 0.44 - 0.10*uShim);',
 
 // specular glints
 '  vec3 L1 = normalize(vec3(-0.40, 0.88, 0.58));',
@@ -489,10 +548,11 @@ var FS = [
 '  col += vec3(0.34,0.40,0.54) * fres * 0.22;',
 
 // tone
+'  col *= mix(1.0, 0.42, inner);',
 '  col = col / (1.0 + col*0.26);',
 '  col = pow(max(col, 0.0), vec3(0.88));',
 
-'  gl_FragColor = vec4(mix(body, col, sticker), 1.0);',
+'  gl_FragColor = vec4(col, 1.0);',
 '}'].join('\n');
 
 function sh(type, src){
@@ -508,6 +568,61 @@ gl.linkProgram(prog);
 if(!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
 gl.useProgram(prog);
 
+// ── flowing dark backdrop: one full-screen pass, drawn before the cube ──
+var BG_VS = [
+'attribute vec2 aP;',
+'varying vec2 vP;',
+'void main(){ vP = aP; gl_Position = vec4(aP, 0.0, 1.0); }'].join('\n');
+
+var BG_FS = [
+'precision highp float;',
+'varying vec2 vP;',
+'uniform float uTime; uniform float uAsp;',
+'float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453123); }',
+'float vnoise(vec2 p){',
+'  vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.0-2.0*f);',
+'  return mix(mix(hash(i),hash(i+vec2(1.0,0.0)),u.x), mix(hash(i+vec2(0.0,1.0)),hash(i+vec2(1.0,1.0)),u.x), u.y);',
+'}',
+'float fbm(vec2 p){',
+'  float s=0.0, a=0.5;',
+'  for(int i=0;i<3;i++){ s+=a*vnoise(p); p=p*2.11+vec2(1.3,-2.7); a*=0.5; }',
+'  return s;',
+'}',
+'void main(){',
+'  vec2 p = vec2(vP.x*uAsp, vP.y);',
+'  float t = uTime * 0.055;',
+// slow domain warp -> the light and dark bands drift and fold
+'  float w1 = fbm(p*0.75 + vec2(t*0.55, -t*0.30));',
+'  float w2 = fbm(p*0.75 + vec2(-t*0.42, t*0.36) + 4.2);',
+'  vec2  q  = p + 1.45*vec2(w1-0.5, w2-0.5);',
+'  float b1 = 0.5 + 0.5*sin(q.x*1.25 + q.y*1.85 - t*1.20);',
+'  float b2 = 0.5 + 0.5*sin(q.x*2.45 - q.y*1.15 + t*0.85 + 2.1);',
+'  float b3 = 0.5 + 0.5*sin(length(q + vec2(0.6,-0.3))*1.05 - t*0.62);',
+'  float band = b1*0.50 + b2*0.28 + b3*0.22;',
+'  float lum  = pow(band, 1.8)*0.92 + w1*0.30;',
+// stays dark: the cube has to remain the brightest thing on screen
+'  vec3 col = mix(vec3(0.018,0.021,0.031), vec3(0.190,0.208,0.276), lum);',
+// crests pick up a whisper of the same prismatic family as the cube
+'  col += vec3(0.052,0.030,0.070) * pow(b1, 6.0);',
+'  col += vec3(0.018,0.046,0.052) * pow(b2, 6.0);',
+'  col += vec3(0.012,0.020,0.026) * pow(1.0-band, 4.0);',
+'  float r = length(p);',
+'  col *= 1.0 - 0.42*smoothstep(0.45, 1.75, r);',
+'  gl_FragColor = vec4(col, 1.0);',
+'}'].join('\n');
+
+var bgProg = gl.createProgram();
+gl.attachShader(bgProg, sh(gl.VERTEX_SHADER, BG_VS));
+gl.attachShader(bgProg, sh(gl.FRAGMENT_SHADER, BG_FS));
+gl.linkProgram(bgProg);
+if(!gl.getProgramParameter(bgProg, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(bgProg));
+var bgLocP = gl.getAttribLocation(bgProg,'aP');
+var bgTime = gl.getUniformLocation(bgProg,'uTime');
+var bgAsp  = gl.getUniformLocation(bgProg,'uAsp');
+var bgBuf  = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, bgBuf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+
 var locPos = gl.getAttribLocation(prog,'aPos');
 var locNrm = gl.getAttribLocation(prog,'aNrm');
 var locTan = gl.getAttribLocation(prog,'aTan');
@@ -520,25 +635,26 @@ var uShim = gl.getUniformLocation(prog,'uShim');
 var uFlow = gl.getUniformLocation(prog,'uFlow');
 
 var bufPos = gl.createBuffer(), bufNrm = gl.createBuffer(), bufTan = gl.createBuffer(), bufSta = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, bufSta);
-gl.bufferData(gl.ARRAY_BUFFER, aStatic, gl.STATIC_DRAW);
-gl.enableVertexAttribArray(locSta);
-gl.vertexAttribPointer(locSta, 4, gl.FLOAT, false, 0, 0);
+gl.bindBuffer(gl.ARRAY_BUFFER, bufSta); gl.bufferData(gl.ARRAY_BUFFER, aStatic, gl.STATIC_DRAW);
+gl.bindBuffer(gl.ARRAY_BUFFER, bufPos); gl.bufferData(gl.ARRAY_BUFFER, aPos, gl.DYNAMIC_DRAW);
+gl.bindBuffer(gl.ARRAY_BUFFER, bufNrm); gl.bufferData(gl.ARRAY_BUFFER, aNrm, gl.DYNAMIC_DRAW);
+gl.bindBuffer(gl.ARRAY_BUFFER, bufTan); gl.bufferData(gl.ARRAY_BUFFER, aTan, gl.DYNAMIC_DRAW);
 
-gl.bindBuffer(gl.ARRAY_BUFFER, bufPos);
-gl.bufferData(gl.ARRAY_BUFFER, aPos, gl.DYNAMIC_DRAW);
-gl.enableVertexAttribArray(locPos);
-gl.vertexAttribPointer(locPos, 3, gl.FLOAT, false, 0, 0);
-
-gl.bindBuffer(gl.ARRAY_BUFFER, bufNrm);
-gl.bufferData(gl.ARRAY_BUFFER, aNrm, gl.DYNAMIC_DRAW);
-gl.enableVertexAttribArray(locNrm);
-gl.vertexAttribPointer(locNrm, 3, gl.FLOAT, false, 0, 0);
-
-gl.bindBuffer(gl.ARRAY_BUFFER, bufTan);
-gl.bufferData(gl.ARRAY_BUFFER, aTan, gl.DYNAMIC_DRAW);
-gl.enableVertexAttribArray(locTan);
-gl.vertexAttribPointer(locTan, 3, gl.FLOAT, false, 0, 0);
+function attach(loc, buf, size){
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
+}
+function bindCube(){
+  attach(locPos, bufPos, 3); attach(locNrm, bufNrm, 3);
+  attach(locTan, bufTan, 3); attach(locSta, bufSta, 4);
+}
+function bindBg(){
+  gl.disableVertexAttribArray(locNrm);
+  gl.disableVertexAttribArray(locTan);
+  gl.disableVertexAttribArray(locSta);
+  attach(bgLocP, bgBuf, 2);
+}
 
 gl.enable(gl.DEPTH_TEST);
 gl.enable(gl.CULL_FACE);
@@ -830,7 +946,7 @@ canvas.addEventListener('contextmenu', function(e){ e.preventDefault(); });
 
 // ════════════════════════════════════════════════════════════ loop
 var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-var last = performance.now(), clock = 0, idle = 0;
+var last = performance.now(), clock = 0;
 
 function frame(now){
   var dt = Math.min(64, now - last); last = now;
@@ -847,9 +963,8 @@ function frame(now){
 
   if(running){ elapsed = now - t0; els.tTime.textContent = fmt(elapsed); }
 
-  // gentle auto-drift when the user is idle
-  if(!drag){ idle += dt; } else { idle = 0; }
-  if(!reduce && idle > 4500 && !anim){ viewT.yaw += dt * 0.00006; }
+  // slow continuous turn, paused only while the pointer is down
+  if(!reduce && !drag){ viewT.yaw += dt * 0.000090; }
 
   updateCamera();
   updateGeometry();
@@ -862,6 +977,17 @@ function frame(now){
   gl.bufferSubData(gl.ARRAY_BUFFER, 0, aTan);
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  gl.disable(gl.DEPTH_TEST);
+  gl.useProgram(bgProg);
+  bindBg();
+  gl.uniform1f(bgTime, clock);
+  gl.uniform1f(bgAsp, canvas.width/canvas.height);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  gl.enable(gl.DEPTH_TEST);
+
+  gl.useProgram(prog);
+  bindCube();
   gl.uniformMatrix4fv(uMVP, false, mvpM);
   gl.uniformMatrix4fv(uModel, false, modelM);
   gl.uniform3fv(uEye, new Float32Array(eye));
