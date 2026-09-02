@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prism Cube</title>
+<style>
+  :root{
+    --ink:#e8ecf5; --dim:#8b93a7; --line:rgba(255,255,255,.13);
+    --panel:rgba(14,16,22,.72); --accent:#a9c6ff;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    background:#07080c;
+    color:var(--ink);
+    font-family:"Helvetica Neue",Inter,system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    overflow:hidden; -webkit-tap-highlight-color:transparent;
+  }
+  #stage{position:fixed;inset:0}
+  canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+  canvas.dragging{cursor:grabbing}
+  #glow{
+    position:fixed;inset:0;pointer-events:none;
+    background:
+      radial-gradient(120% 80% at 50% 8%, rgba(120,150,255,.10), transparent 60%),
+      radial-gradient(90% 70% at 50% 108%, rgba(255,150,220,.07), transparent 60%);
+  }
+
+  /* ---------- HUD ---------- */
+  .hud{position:fixed;pointer-events:none;z-index:5}
+  .hud > *{pointer-events:auto}
+
+  #top{top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:18px 20px;gap:16px}
+  .mark{font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--dim);line-height:1.9}
+  .mark b{display:block;font-size:15px;letter-spacing:.22em;color:var(--ink);font-weight:600}
+  .stats{display:flex;gap:22px;text-align:right;font-variant-numeric:tabular-nums}
+  .stat span{display:block;font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
+  .stat b{font-size:19px;font-weight:500;letter-spacing:.02em}
+
+  #bottom{left:0;right:0;bottom:0;padding:16px 20px 22px;display:flex;flex-direction:column;gap:14px;align-items:center}
+  .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  button{
+    font:inherit;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink);background:var(--panel);border:1px solid var(--line);
+    padding:10px 16px;border-radius:999px;cursor:pointer;
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    transition:border-color .18s, background .18s, transform .12s;
+  }
+  button:hover{border-color:rgba(169,198,255,.55);background:rgba(24,28,40,.8)}
+  button:active{transform:translateY(1px)}
+  button.key{background:rgba(169,198,255,.14);border-color:rgba(169,198,255,.42)}
+
+  .sliders{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 18px;
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  .sl{display:flex;align-items:center;gap:10px}
+  .sl label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+  .sl output{font-size:10.5px;color:var(--dim);width:2.4em;text-align:right;font-variant-numeric:tabular-nums}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:104px;height:20px;background:transparent;cursor:pointer}
+  input[type=range]::-webkit-slider-runnable-track{height:2px;background:rgba(255,255,255,.2);border-radius:2px}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;
+    background:var(--accent);margin-top:-4.5px;box-shadow:0 0 10px rgba(169,198,255,.6)}
+  input[type=range]::-moz-range-track{height:2px;background:rgba(255,255,255,.2);border-radius:2px}
+  input[type=range]::-moz-range-thumb{width:11px;height:11px;border:0;border-radius:50%;background:var(--accent)}
+
+  #help{font-size:11px;color:var(--dim);letter-spacing:.05em;text-align:center;line-height:1.8;max-width:560px}
+  #help kbd{font:inherit;font-size:10.5px;letter-spacing:.1em;color:var(--ink);
+    border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin:0 1px}
+
+  /* ---------- overlays ---------- */
+  #win{
+    position:fixed;inset:0;z-index:10;display:none;place-items:end center;padding-bottom:6vh;
+    background:radial-gradient(70% 60% at 50% 45%, rgba(10,12,20,.55), rgba(5,6,10,.86));
+    animation:fade .5s ease both;
+    pointer-events:none;              /* the cube stays reachable behind the card */
+  }
+  #win .card{pointer-events:auto}
+  #win.on{display:grid}
+  #win .card{transform:translateY(0)}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .card{text-align:center;padding:38px 44px;border:1px solid var(--line);border-radius:22px;
+    background:rgba(12,14,20,.78);max-width:min(88vw,440px)}
+  .card h2{margin:0 0 6px;font-size:13px;letter-spacing:.4em;text-transform:uppercase;color:var(--accent);font-weight:500}
+  .card .big{font-size:34px;font-weight:300;letter-spacing:.02em;margin:10px 0 2px;font-variant-numeric:tabular-nums}
+  .card p{margin:14px 0 0;font-size:12.5px;color:var(--dim);line-height:1.9;letter-spacing:.04em}
+  .card .reward{margin-top:20px;padding:14px 16px;border:1px dashed rgba(169,198,255,.34);border-radius:12px;
+    font-size:11.5px;letter-spacing:.14em;color:var(--accent);text-transform:uppercase}
+  .card .row{margin-top:22px}
+
+  #toast{
+    position:fixed;left:50%;top:78px;transform:translateX(-50%);z-index:8;
+    font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);
+    background:var(--panel);border:1px solid rgba(169,198,255,.3);border-radius:999px;padding:8px 16px;
+    opacity:0;transition:opacity .3s;pointer-events:none;
+  }
+  #toast.on{opacity:1}
+
+  @media (max-width:640px){
+    #top{padding:14px}
+    .stat b{font-size:16px}
+    .stats{gap:14px}
+    #help{display:none}
+    .sliders{gap:12px;padding:10px 12px}
+    input[type=range]{width:78px}
+    button{padding:9px 13px;font-size:10.5px;letter-spacing:.12em}
+  }
+</style>
+</head>
+<body>
+
+<div id="stage"><canvas id="gl"></canvas></div>
+<div id="glow"></div>
+
+<div class="hud" id="top">
+  <div class="mark"><b>PRISM CUBE</b>표면이 계속 변합니다</div>
+  <div class="stats">
+    <div class="stat"><span>Time</span><b id="tTime">0:00</b></div>
+    <div class="stat"><span>Moves</span><b id="tMoves">0</b></div>
+  </div>
+</div>
+
+<div class="hud" id="bottom">
+  <div id="help">
+    면을 드래그하면 그 층이 돌아갑니다 · 빈 공간을 드래그하면 큐브 전체가 돌아갑니다<br>
+    <kbd>U</kbd><kbd>D</kbd><kbd>L</kbd><kbd>R</kbd><kbd>F</kbd><kbd>B</kbd> 회전 · <kbd>Shift</kbd>+키 반대 방향 · <kbd>Space</kbd> 섞기 · <kbd>Z</kbd> 되돌리기
+  </div>
+  <div class="sliders">
+    <div class="sl"><label for="sShim">요동</label><input id="sShim" type="range" min="0" max="100" value="78"><output id="oShim">78</output></div>
+    <div class="sl"><label for="sFlow">흐름</label><input id="sFlow" type="range" min="0" max="100" value="55"><output id="oFlow">55</output></div>
+    <div class="sl"><label for="sSpeed">회전속도</label><input id="sSpeed" type="range" min="20" max="100" value="62"><output id="oSpeed">62</output></div>
+  </div>
+  <div class="row">
+    <button id="bScramble" class="key">섞기</button>
+    <button id="bUndo">되돌리기</button>
+    <button id="bReset">초기화</button>
+    <button id="bView">시점 리셋</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<div id="win">
+  <div class="card">
+    <h2>Solved</h2>
+    <div class="big" id="wTime">0:00</div>
+    <p><span id="wMoves">0</span>수 · 표면이 계속 흔들리는 와중에 여섯 면을 맞췄습니다.</p>
+    <div class="reward">리워드 자리 — 준비 중</div>
+    <div class="row">
+      <button id="bAgain" class="key">다시 섞기</button>
+      <button id="bClose">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+// ════════════════════════════════════════════════════════════ math
+function mIdent(){ return new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]); }
+function mMul(a,b,out){ // out = a*b (column-major)
+  out = out || new Float32Array(16);
+  for(var c=0;c<4;c++){
+    var b0=b[c*4],b1=b[c*4+1],b2=b[c*4+2],b3=b[c*4+3];
+    out[c*4  ]=a[0]*b0+a[4]*b1+a[8] *b2+a[12]*b3;
+    out[c*4+1]=a[1]*b0+a[5]*b1+a[9] *b2+a[13]*b3;
+    out[c*4+2]=a[2]*b0+a[6]*b1+a[10]*b2+a[14]*b3;
+    out[c*4+3]=a[3]*b0+a[7]*b1+a[11]*b2+a[15]*b3;
+  }
+  return out;
+}
+function mPersp(fovy,asp,zn,zf){
+  var f=1/Math.tan(fovy/2), nf=1/(zn-zf);
+  return new Float32Array([f/asp,0,0,0, 0,f,0,0, 0,0,(zf+zn)*nf,-1, 0,0,2*zf*zn*nf,0]);
+}
+function mLookAt(eye,ctr,up){
+  var z=vNorm(vSub(eye,ctr)), x=vNorm(vCross(up,z)), y=vCross(z,x);
+  return new Float32Array([
+    x[0],y[0],z[0],0,
+    x[1],y[1],z[1],0,
+    x[2],y[2],z[2],0,
+    -vDot(x,eye),-vDot(y,eye),-vDot(z,eye),1]);
+}
+function mRot(axis,ang){ // axis: 0=x,1=y,2=z
+  var c=Math.cos(ang), s=Math.sin(ang), m=mIdent();
+  if(axis===0){ m[5]=c; m[6]=s; m[9]=-s; m[10]=c; }
+  else if(axis===1){ m[0]=c; m[2]=-s; m[8]=s; m[10]=c; }
+  else { m[0]=c; m[1]=s; m[4]=-s; m[5]=c; }
+  return m;
+}
+function vSub(a,b){ return [a[0]-b[0],a[1]-b[1],a[2]-b[2]]; }
+function vDot(a,b){ return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]; }
+function vCross(a,b){ return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]]; }
+function vNorm(a){ var l=Math.hypot(a[0],a[1],a[2])||1; return [a[0]/l,a[1]/l,a[2]/l]; }
+function xf3(m,v){ // rotate vec3 by upper-left 3x3 of column-major mat4
+  return [ m[0]*v[0]+m[4]*v[1]+m[8]*v[2],
+           m[1]*v[0]+m[5]*v[1]+m[9]*v[2],
+           m[2]*v[0]+m[6]*v[1]+m[10]*v[2] ];
+}
+function xf3T(m,v){ // rotate by transpose (inverse for pure rotations)
+  return [ m[0]*v[0]+m[1]*v[1]+m[2]*v[2],
+           m[4]*v[0]+m[5]*v[1]+m[6]*v[2],
+           m[8]*v[0]+m[9]*v[1]+m[10]*v[2] ];
+}
+function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+
+// ════════════════════════════════════════════════════════════ cube state
+// Face index: 0 +X, 1 -X, 2 +Y, 3 -Y, 4 +Z, 5 -Z
+var FACE_N = [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
+// tangent basis per face (u,v) — u x v = n
+// invariant: u × v === n  (keeps every quad wound counter-clockwise from outside)
+var FACE_U = [[0,0,-1],[0,0,1],[1,0,0],[1,0,0],[1,0,0],[-1,0,0]];
+var FACE_V = [[0,1,0],[0,1,0],[0,0,-1],[0,0,1],[0,1,0],[0,1,0]];
+
+var cubies = [];
+function buildCubies(){
+  cubies.length = 0;
+  for(var x=-1;x<=1;x++) for(var y=-1;y<=1;y++) for(var z=-1;z<=1;z++){
+    if(x===0&&y===0&&z===0) continue;
+    var col = [ x===1?0:-1, x===-1?1:-1, y===1?2:-1, y===-1?3:-1, z===1?4:-1, z===-1?5:-1 ];
+    cubies.push({ p:[x,y,z], o:mIdent(), col:col, seed:(cubies.length*0.6180339887)%1 });
+  }
+}
+buildCubies();
+
+// integer 90° position rotation
+function rotP(p,axis,dir){
+  var x=p[0],y=p[1],z=p[2];
+  if(axis===0) return dir>0 ? [x,-z,y] : [x,z,-y];
+  if(axis===1) return dir>0 ? [z,y,-x] : [-z,y,x];
+  return dir>0 ? [-y,x,z] : [y,-x,z];
+}
+
+var history = [];          // committed moves for undo
+var anim = null;           // {axis, layer, dir, t, dur, record}
+var queue = [];            // pending moves
+
+function applyTurn(axis, layer, dir){
+  var R = mRot(axis, dir*Math.PI/2);
+  for(var i=0;i<cubies.length;i++){
+    var c = cubies[i];
+    if(c.p[axis] !== layer) continue;
+    c.p = rotP(c.p, axis, dir);
+    c.o = mMul(R, c.o, new Float32Array(16));
+  }
+}
+
+function startTurn(axis, layer, dir, record, fast){
+  if(anim) { queue.push([axis,layer,dir,record,fast]); return; }
+  var base = 260 - 1.9*(+els.sSpeed.value);   // 62 -> ~142ms
+  anim = { axis:axis, layer:layer, dir:dir, t:0, dur: fast? Math.max(48, base*0.42) : base, record:record };
+}
+
+function isSolved(){
+  for(var f=0; f<6; f++){
+    var n = FACE_N[f], seen = -1, count = 0;
+    for(var i=0;i<cubies.length;i++){
+      var c = cubies[i];
+      // is this cubie on face f? its position dotted with n must be 1
+      if(vDot(c.p, n) !== 1) continue;
+      count++;
+      // which local face points along n?
+      var ln = xf3T(c.o, n);
+      var li = -1;
+      for(var k=0;k<6;k++){
+        var fn = FACE_N[k];
+        if(Math.round(ln[0])===fn[0] && Math.round(ln[1])===fn[1] && Math.round(ln[2])===fn[2]){ li=k; break; }
+      }
+      if(li<0) return false;
+      var col = c.col[li];
+      if(col<0) return false;
+      if(seen<0) seen = col; else if(seen!==col) return false;
+    }
+    if(count!==9) return false;
+  }
+  return true;
+}
+
+// ════════════════════════════════════════════════════════════ geometry
+// per cubie: 6 quads. static attrs (uv, faceId, seed), dynamic attrs (pos, normal)
+var CUB = 0.98, GAP = 1.0, HALF = CUB/2;
+var VPF = 6, VPC = 6*VPF, NVERT = 26*VPC;
+
+var aStatic = new Float32Array(NVERT*4);   // u,v,faceId,seed
+var aPos    = new Float32Array(NVERT*3);
+var aNrm    = new Float32Array(NVERT*3);
+var aTan    = new Float32Array(NVERT*3);
+var quadLocal = [];   // per face: 6 verts of local positions + normal + tangent
+
+(function buildLocal(){
+  var q = [[0,0],[1,0],[1,1], [0,0],[1,1],[0,1]];
+  for(var f=0;f<6;f++){
+    var n=FACE_N[f], u=FACE_U[f], v=FACE_V[f], verts=[];
+    for(var i=0;i<6;i++){
+      var a=(q[i][0]*2-1)*HALF, b=(q[i][1]*2-1)*HALF;
+      verts.push([ n[0]*HALF+u[0]*a+v[0]*b, n[1]*HALF+u[1]*a+v[1]*b, n[2]*HALF+u[2]*a+v[2]*b ]);
+    }
+    quadLocal.push({ n:n, t:u, verts:verts, uvs:q });
+  }
+})();
+
+(function fillStatic(){
+  var o=0;
+  for(var ci=0; ci<26; ci++){
+    var c = cubies[ci];
+    for(var f=0; f<6; f++){
+      var fid = c.col[f] < 0 ? 6 : c.col[f];
+      var sd  = (Math.sin(ci*12.9898 + f*78.233)*43758.5453) % 1;
+      sd = sd < 0 ? sd+1 : sd;
+      for(var i=0;i<6;i++){
+        aStatic[o++] = quadLocal[f].uvs[i][0];
+        aStatic[o++] = quadLocal[f].uvs[i][1];
+        aStatic[o++] = fid;
+        aStatic[o++] = sd;
+      }
+    }
+  }
+})();
+
+function updateGeometry(){
+  var o3=0, i, f, k, c;
+  var animR = null;
+  if(anim){
+    var e = anim.t/anim.dur; e = e<0?0:(e>1?1:e);
+    e = e<0.5 ? 4*e*e*e : 1-Math.pow(-2*e+2,3)/2;   // easeInOutCubic
+    animR = mRot(anim.axis, anim.dir*e*Math.PI/2);
+  }
+  for(i=0;i<26;i++){
+    c = cubies[i];
+    var moving = animR && c.p[anim.axis] === anim.layer;
+    var cx=c.p[0]*GAP, cy=c.p[1]*GAP, cz=c.p[2]*GAP;
+    for(f=0;f<6;f++){
+      var ql = quadLocal[f];
+      var nw = xf3(c.o, ql.n);
+      var tw = xf3(c.o, ql.t);
+      if(moving){ nw = xf3(animR, nw); tw = xf3(animR, tw); }
+      for(k=0;k<6;k++){
+        var lp = ql.verts[k];
+        var p = xf3(c.o, lp);
+        p[0]+=cx; p[1]+=cy; p[2]+=cz;
+        if(moving) p = xf3(animR, p);
+        aPos[o3]=p[0]; aPos[o3+1]=p[1]; aPos[o3+2]=p[2];
+        aNrm[o3]=nw[0]; aNrm[o3+1]=nw[1]; aNrm[o3+2]=nw[2];
+        aTan[o3]=tw[0]; aTan[o3+1]=tw[1]; aTan[o3+2]=tw[2];
+        o3+=3;
+      }
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════════ webgl
+var canvas = document.getElementById('gl');
+var gl = canvas.getContext('webgl', {antialias:true, alpha:false, premultipliedAlpha:false})
+      || canvas.getContext('experimental-webgl', {antialias:true, alpha:false});
+if(!gl){ document.body.innerHTML = '<div style="padding:40px;font:14px system-ui;color:#ccc">이 브라우저에서는 WebGL을 쓸 수 없습니다.</div>'; return; }
+
+var VS = [
+'attribute vec3 aPos;',
+'attribute vec3 aNrm;',
+'attribute vec3 aTan;',
+'attribute vec4 aSta;',      // u, v, faceId, seed
+'uniform mat4 uMVP;',
+'uniform mat4 uModel;',
+'varying vec3 vN; varying vec3 vT; varying vec3 vW; varying vec2 vUv; varying float vF; varying float vS;',
+'void main(){',
+'  vec4 wp = uModel * vec4(aPos,1.0);',
+'  vW = wp.xyz;',
+'  mat3 R = mat3(uModel[0].xyz, uModel[1].xyz, uModel[2].xyz);',
+'  vN = R * aNrm;',
+'  vT = R * aTan;',
+'  vUv = aSta.xy; vF = aSta.z; vS = aSta.w;',
+'  gl_Position = uMVP * vec4(aPos,1.0);',
+'}'].join('\n');
+
+var FS = [
+'precision highp float;',
+'varying vec3 vN; varying vec3 vT; varying vec3 vW; varying vec2 vUv; varying float vF; varying float vS;',
+'uniform vec3 uEye; uniform float uTime; uniform float uShim; uniform float uFlow;',
+
+'float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453123); }',
+'float vnoise(vec2 p){',
+'  vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.0-2.0*f);',
+'  return mix(mix(hash(i),hash(i+vec2(1.0,0.0)),u.x), mix(hash(i+vec2(0.0,1.0)),hash(i+vec2(1.0,1.0)),u.x), u.y);',
+'}',
+'float fbm(vec2 p){',
+'  float s=0.0, a=0.5;',
+'  for(int i=0;i<3;i++){ s+=a*vnoise(p); p=p*2.07+vec2(1.7,-2.3); a*=0.5; }',
+'  return s;',
+'}',
+// spectral response — soft rainbow ramp
+'vec3 spectrum(float t){',
+'  return 0.5 + 0.5*cos(6.28318*(t + vec3(0.0, 0.33, 0.67)));',
+'}',
+// studio environment: overhead softbox, cool bounce, warm floor, a couple of strip lights
+'vec3 env(vec3 d){',
+'  float up = d.y*0.5 + 0.5;',
+'  vec3 c = mix(vec3(0.11,0.12,0.16), vec3(1.10,1.13,1.20), smoothstep(0.20,0.85,up));',
+'  c += vec3(1.00,1.01,1.04) * smoothstep(0.85,0.995,up) * 0.58;',
+'  c += vec3(0.20,0.28,0.46) * smoothstep(0.46,0.14,up);',
+'  c += vec3(0.44,0.25,0.15) * pow(1.0-up, 5.0);',
+'  c += vec3(0.58) * pow(max(0.0, sin(d.y*7.4 + 1.6)), 24.0);',
+'  c += vec3(0.36) * pow(max(0.0, sin(d.x*5.1 - 0.4)), 30.0);',
+'  return c;',
+'}',
+// surface height field — three pattern families drawn from the reference sheet
+'float surf(vec2 x, float t, float sd, float fam){',
+'  float a = fbm(x*1.12 + sd);',
+'  float b = 0.5 + 0.5*sin(length(x*1.75)*3.1 - t*1.05 + sd);',
+'  float c = 0.5 + 0.5*sin(dot(x, vec2(2.25,1.55)) + t*0.78 + sd*2.0);',
+'  return mix(mix(a, b, smoothstep(0.30,0.60,fam)), c, smoothstep(0.62,0.94,fam));',
+'}',
+
+'void main(){',
+'  vec3 N = normalize(vN);',
+'  vec3 V = normalize(uEye - vW);',
+'  float ndv = clamp(dot(N,V), 0.0, 1.0);',
+'  float fres = pow(1.0 - ndv, 3.2);',
+
+// rounded-square sticker mask
+'  vec2 p = vUv*2.0 - 1.0;',
+'  vec2 dq = abs(p) - vec2(0.845);',
+'  float sd = length(max(dq, 0.0)) + min(max(dq.x, dq.y), 0.0) - 0.11;',
+'  float sticker = smoothstep(0.030, -0.012, sd);',
+
+// body (plastic frame + inner faces)
+'  vec3 body = vec3(0.028,0.031,0.040);',
+'  body += vec3(0.30,0.34,0.44) * fres * 0.55;',
+'  body += vec3(0.05) * smoothstep(0.16, 0.0, abs(sd));',
+
+'  if(vF > 5.5){ gl_FragColor = vec4(body, 1.0); return; }',
+
+// ---- holographic surface -------------------------------------------------
+'  float t   = uTime * (0.08 + 0.40*uFlow);',
+'  float sd2 = vS * 29.0;',
+'  float fam = abs(fract(vS*1.85 + uTime*0.011*uFlow)*2.0 - 1.0);',
+'  vec2  q   = p * 1.30;',
+
+// domain warp -> liquid chrome flow
+'  float w1 = fbm(q*1.20 + vec2(t*0.50, -t*0.30) + sd2);',
+'  float w2 = fbm(q*1.20 + vec2(-t*0.36, t*0.46) + sd2 + 5.1);',
+'  vec2  qw = q + (0.32 + 0.55*uFlow) * vec2(w1 - 0.5, w2 - 0.5);',
+
+// height field + analytic gradient -> the surface actually has relief
+'  float e  = 0.045;',
+'  float h0 = surf(qw, t, sd2, fam);',
+'  float hx = surf(qw + vec2(e,0.0), t, sd2, fam);',
+'  float hy = surf(qw + vec2(0.0,e), t, sd2, fam);',
+'  float bump = 0.86 + 1.00*uShim;',
+'  vec3  T = normalize(vT - N*dot(N,vT));',
+'  vec3  B = cross(N, T);',
+'  vec3  Np = normalize(N + (T*(h0-hx) + B*(h0-hy)) * 4.3 * bump);',
+
+'  float ndvp = clamp(dot(Np,V), 0.0, 1.0);',
+'  float fresP = pow(1.0 - ndvp, 3.0);',
+
+// chrome: the reflected studio, which is what makes it read as metal/glass
+'  vec3 Rr = reflect(-V, Np);',
+'  vec3 chrome = env(Rr);',
+
+// thin-film phase -> oil-slick wash over the chrome
+'  float phase = 4.10*ndvp + 2.55*h0 + 0.9*w1 + t*0.58 + vS*6.283;',
+'  float baseHue = vF * (1.0/6.0) + 0.03 + uTime * 0.010 * uShim;',
+'  float wander  = uShim * (0.085*sin(phase) + 0.050*(h0-0.5));',
+'  float hue = baseHue + wander;',
+'  float split = 0.05 + 0.09*uShim;',
+'  vec3 slick = vec3(spectrum(hue - split).r, spectrum(hue).g, spectrum(hue + split).b);',
+
+// silver first: the reflection is mostly neutral, iridescence only modulates it
+'  vec3 silver = mix(vec3(dot(chrome, vec3(0.299,0.587,0.114))), chrome, 0.26);',
+'  float ir = 0.26 + 0.32*uShim;',
+'  vec3 col = silver * (1.0 + (slick - 0.5) * 1.30 * ir);',
+
+// identity cast — the one thing you can actually sort the cube by.
+// it drifts a little so a glance is never enough, but the ordering never inverts.
+'  float tintHue = baseHue + uShim * 0.045 * sin(t*0.29 + vS*6.0);',
+'  vec3  tintC = spectrum(tintHue);',
+'  col *= 1.0 + (tintC - 0.5) * (0.60 - 0.13*uShim);',
+
+// specular glints
+'  vec3 L1 = normalize(vec3(-0.40, 0.88, 0.58));',
+'  vec3 L2 = normalize(vec3(0.72, 0.30, -0.52));',
+'  vec3 H1 = normalize(L1 + V), H2 = normalize(L2 + V);',
+'  col += vec3(1.0,0.99,0.97) * pow(max(dot(Np,H1),0.0), 60.0) * 1.30;',
+'  col += mix(vec3(1.0), slick, 0.6) * pow(max(dot(Np,H2),0.0), 24.0) * 0.55;',
+
+// rim: prismatic edge catch
+'  col += mix(vec3(0.80,0.86,1.0), slick, 0.55) * fresP * (0.26 + 0.24*uShim);',
+'  col += vec3(0.34,0.40,0.54) * fres * 0.22;',
+
+// tone
+'  col = col / (1.0 + col*0.26);',
+'  col = pow(max(col, 0.0), vec3(0.88));',
+
+'  gl_FragColor = vec4(mix(body, col, sticker), 1.0);',
+'}'].join('\n');
+
+function sh(type, src){
+  var s = gl.createShader(type);
+  gl.shaderSource(s, src); gl.compileShader(s);
+  if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) + '\n' + src);
+  return s;
+}
+var prog = gl.createProgram();
+gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS));
+gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
+gl.linkProgram(prog);
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+gl.useProgram(prog);
+
+var locPos = gl.getAttribLocation(prog,'aPos');
+var locNrm = gl.getAttribLocation(prog,'aNrm');
+var locTan = gl.getAttribLocation(prog,'aTan');
+var locSta = gl.getAttribLocation(prog,'aSta');
+var uMVP = gl.getUniformLocation(prog,'uMVP');
+var uModel = gl.getUniformLocation(prog,'uModel');
+var uEye = gl.getUniformLocation(prog,'uEye');
+var uTime = gl.getUniformLocation(prog,'uTime');
+var uShim = gl.getUniformLocation(prog,'uShim');
+var uFlow = gl.getUniformLocation(prog,'uFlow');
+
+var bufPos = gl.createBuffer(), bufNrm = gl.createBuffer(), bufTan = gl.createBuffer(), bufSta = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, bufSta);
+gl.bufferData(gl.ARRAY_BUFFER, aStatic, gl.STATIC_DRAW);
+gl.enableVertexAttribArray(locSta);
+gl.vertexAttribPointer(locSta, 4, gl.FLOAT, false, 0, 0);
+
+gl.bindBuffer(gl.ARRAY_BUFFER, bufPos);
+gl.bufferData(gl.ARRAY_BUFFER, aPos, gl.DYNAMIC_DRAW);
+gl.enableVertexAttribArray(locPos);
+gl.vertexAttribPointer(locPos, 3, gl.FLOAT, false, 0, 0);
+
+gl.bindBuffer(gl.ARRAY_BUFFER, bufNrm);
+gl.bufferData(gl.ARRAY_BUFFER, aNrm, gl.DYNAMIC_DRAW);
+gl.enableVertexAttribArray(locNrm);
+gl.vertexAttribPointer(locNrm, 3, gl.FLOAT, false, 0, 0);
+
+gl.bindBuffer(gl.ARRAY_BUFFER, bufTan);
+gl.bufferData(gl.ARRAY_BUFFER, aTan, gl.DYNAMIC_DRAW);
+gl.enableVertexAttribArray(locTan);
+gl.vertexAttribPointer(locTan, 3, gl.FLOAT, false, 0, 0);
+
+gl.enable(gl.DEPTH_TEST);
+gl.enable(gl.CULL_FACE);
+gl.cullFace(gl.BACK);
+gl.clearColor(0.027,0.031,0.047,1);
+
+// ════════════════════════════════════════════════════════════ camera
+var FOV = 38*Math.PI/180;
+var view = { yaw:-0.62, pitch:0.52, dist:8.6, cy:0 };
+var viewT = { yaw:-0.62, pitch:0.52 };
+var modelM = mIdent(), mvpM = mIdent(), projM = mIdent(), viewM = mIdent();
+var eye = [0,0,8.6];
+
+function updateCamera(){
+  view.yaw   += (viewT.yaw - view.yaw) * 0.18;
+  view.pitch += (viewT.pitch - view.pitch) * 0.18;
+  modelM = mMul(mRot(1, view.yaw), mIdent(), new Float32Array(16));
+  modelM = mMul(mRot(0, view.pitch), modelM, new Float32Array(16));
+  eye = [0, view.cy, view.dist];
+  viewM = mLookAt(eye, [0, view.cy, 0], [0,1,0]);
+  var vp = mMul(projM, viewM, new Float32Array(16));
+  mvpM = mMul(vp, modelM, new Float32Array(16));
+}
+
+var W=1,H=1,DPR=1;
+function resize(){
+  DPR = Math.min(window.devicePixelRatio||1, 2);
+  W = canvas.clientWidth; H = canvas.clientHeight;
+  canvas.width = Math.max(1, Math.round(W*DPR));
+  canvas.height = Math.max(1, Math.round(H*DPR));
+  gl.viewport(0,0,canvas.width,canvas.height);
+  var asp = canvas.width/canvas.height;
+
+  // fit the cube's bounding sphere, then leave room for the HUD strip at the bottom
+  var r  = 1.5*GAP*Math.sqrt(3) + 0.10;                // bounding sphere: never clips, whatever the orbit
+  var ty = Math.tan(FOV/2);
+  var hud = W < 640 ? 215 : 175;                       // css px of controls under the cube
+  var vFrac = Math.max(0.45, (H - hud) / H);
+  view.dist = Math.max(r/(ty*vFrac), r/(ty*asp));
+  view.cy   = -(hud/H) * view.dist * ty * 0.42;        // lift the cube clear of the controls
+
+  projM = mPersp(FOV, asp, 0.1, 100);
+}
+window.addEventListener('resize', resize);
+
+// ════════════════════════════════════════════════════════════ picking
+function screenRay(px, py){
+  var ndcx = (px / W) * 2 - 1;
+  var ndcy = 1 - (py / H) * 2;
+  var asp = canvas.width/canvas.height;
+  var ty = Math.tan(FOV/2);
+  // camera space direction
+  var dc = vNorm([ ndcx*ty*asp, ndcy*ty, -1 ]);
+  // camera sits on +z looking at origin, no rotation of its own -> world == camera axes
+  var o = [eye[0], eye[1], eye[2]];
+  // to model space (model matrix is pure rotation)
+  return { o: xf3T(modelM, o), d: xf3T(modelM, dc) };
+}
+
+function pick(px, py){
+  var r = screenRay(px, py);
+  var lim = 1.5*GAP, best = null;
+  for(var f=0; f<6; f++){
+    var n = FACE_N[f];
+    var denom = vDot(n, r.d);
+    if(denom > -1e-6) continue;                    // must face the camera
+    var t = (lim - vDot(n, r.o)) / denom;
+    if(t < 0) continue;
+    var h = [ r.o[0]+r.d[0]*t, r.o[1]+r.d[1]*t, r.o[2]+r.d[2]*t ];
+    var ax = f>>1;
+    var ok = true;
+    for(var k=0;k<3;k++){ if(k!==ax && Math.abs(h[k]) > lim+1e-4) ok=false; }
+    if(!ok) continue;
+    if(!best || t < best.t) best = { t:t, face:f, h:h, n:n };
+  }
+  if(!best) return null;
+  var cell = [0,0,0], a = best.face>>1;
+  for(var k=0;k<3;k++){
+    cell[k] = (k===a) ? (FACE_N[best.face][k]) : clamp(Math.round(best.h[k]/GAP), -1, 1);
+  }
+  return { face:best.face, n:best.n, cell:cell, h:best.h };
+}
+
+// project a model-space point to screen px
+function projectPt(p){
+  var v = [ mvpM[0]*p[0]+mvpM[4]*p[1]+mvpM[8]*p[2]+mvpM[12],
+            mvpM[1]*p[0]+mvpM[5]*p[1]+mvpM[9]*p[2]+mvpM[13],
+            0,
+            mvpM[3]*p[0]+mvpM[7]*p[1]+mvpM[11]*p[2]+mvpM[15] ];
+  var iw = 1/(v[3]||1e-6);
+  return [ (v[0]*iw*0.5+0.5)*W, (0.5 - v[1]*iw*0.5)*H ];
+}
+
+// ════════════════════════════════════════════════════════════ input
+var drag = null;
+function ptr(e){
+  var r = canvas.getBoundingClientRect();
+  return [ e.clientX - r.left, e.clientY - r.top ];
+}
+
+canvas.addEventListener('pointerdown', function(e){
+  if(e.button!==0 && e.pointerType==='mouse') return;
+  canvas.setPointerCapture(e.pointerId);
+  canvas.classList.add('dragging');
+  els.win.classList.remove('on');
+  var pt = ptr(e);
+  var hit = (e.shiftKey || anim) ? null : pick(pt[0], pt[1]);
+  drag = { mode: hit ? 'face' : 'orbit', start: pt, last: pt, hit: hit,
+           yaw0: viewT.yaw, pitch0: viewT.pitch, done:false };
+});
+
+canvas.addEventListener('pointermove', function(e){
+  if(!drag) return;
+  var pt = ptr(e);
+  if(drag.mode === 'orbit'){
+    viewT.yaw   = drag.yaw0 + (pt[0]-drag.start[0]) * 0.0085;
+    viewT.pitch = clamp(drag.pitch0 + (pt[1]-drag.start[1]) * 0.0085, -1.32, 1.32);
+  } else if(!drag.done){
+    var dx = pt[0]-drag.start[0], dy = pt[1]-drag.start[1];
+    if(Math.hypot(dx,dy) < 14) return;
+    drag.done = true;
+    resolveFaceDrag(drag.hit, [dx,dy]);
+  }
+  drag.last = pt;
+});
+
+function endDrag(e){
+  if(!drag) return;
+  if(drag.mode==='face' && !drag.done){
+    // a tap on the cube: nothing, but keeps orientation stable
+  }
+  drag = null;
+  canvas.classList.remove('dragging');
+}
+canvas.addEventListener('pointerup', endDrag);
+canvas.addEventListener('pointercancel', endDrag);
+
+function resolveFaceDrag(hit, dscreen){
+  var n = hit.n, f = hit.face;
+  var cands = [ FACE_U[f], [-FACE_U[f][0],-FACE_U[f][1],-FACE_U[f][2]],
+                FACE_V[f], [-FACE_V[f][0],-FACE_V[f][1],-FACE_V[f][2]] ];
+  var p0 = projectPt(hit.h);
+  var best = null, bestScore = -Infinity;
+  var dl = Math.hypot(dscreen[0], dscreen[1]) || 1;
+  var dn = [dscreen[0]/dl, dscreen[1]/dl];
+  for(var i=0;i<4;i++){
+    var c = cands[i];
+    var p1 = projectPt([ hit.h[0]+c[0]*0.55, hit.h[1]+c[1]*0.55, hit.h[2]+c[2]*0.55 ]);
+    var sx = p1[0]-p0[0], sy = p1[1]-p0[1];
+    var sl = Math.hypot(sx,sy);
+    if(sl < 1e-3) continue;
+    var score = (sx/sl)*dn[0] + (sy/sl)*dn[1];
+    if(score > bestScore){ bestScore = score; best = c; }
+  }
+  if(!best) return;
+  var ax = vCross(n, best);   // rotation axis, right-handed positive turn
+  var k = 0, mag = Math.abs(ax[0]);
+  if(Math.abs(ax[1]) > mag){ k = 1; mag = Math.abs(ax[1]); }
+  if(Math.abs(ax[2]) > mag){ k = 2; }
+  var sign = ax[k] > 0 ? 1 : -1;
+  var layer = hit.cell[k];
+  pushMove(k, layer, sign);
+}
+
+// ════════════════════════════════════════════════════════════ moves / game
+// session: a run of play that ends the moment the cube comes back to solved
+var moves = 0, scrambled = false, running = false, t0 = 0, elapsed = 0, active = false;
+var els = {
+  tTime: document.getElementById('tTime'), tMoves: document.getElementById('tMoves'),
+  sShim: document.getElementById('sShim'), sFlow: document.getElementById('sFlow'), sSpeed: document.getElementById('sSpeed'),
+  oShim: document.getElementById('oShim'), oFlow: document.getElementById('oFlow'), oSpeed: document.getElementById('oSpeed'),
+  win: document.getElementById('win'), wTime: document.getElementById('wTime'), wMoves: document.getElementById('wMoves'),
+  toast: document.getElementById('toast')
+};
+
+function bumpMove(){
+  if(!active){                       // first move of a fresh run
+    active = true; moves = 0; elapsed = 0;
+    els.win.classList.remove('on');
+  }
+  if(!running){ running = true; t0 = performance.now() - elapsed; }
+  moves++; els.tMoves.textContent = moves;
+}
+
+function pushMove(axis, layer, dir, opts){
+  opts = opts || {};
+  if(window.__prism) window.__prism.lastMove = [axis, layer, dir];
+  startTurn(axis, layer, dir, !opts.silent, !!opts.fast);
+  if(!opts.silent) bumpMove();
+}
+
+function commitTurn(a){
+  applyTurn(a.axis, a.layer, a.dir);
+  if(a.record) history.push([a.axis, a.layer, a.dir]);
+  if(!isSolved()){ scrambled = true; }          // off-solved: the win check is armed
+  else if(scrambled){ onSolved(); }
+}
+
+function onSolved(){
+  running = false; active = false; scrambled = false;
+  els.wTime.textContent = fmt(elapsed);
+  els.wMoves.textContent = moves;
+  els.win.classList.add('on');
+}
+
+function fmt(ms){
+  var s = Math.floor(ms/1000);
+  return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+}
+
+function toast(msg){
+  els.toast.textContent = msg;
+  els.toast.classList.add('on');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function(){ els.toast.classList.remove('on'); }, 1400);
+}
+
+function scramble(){
+  els.win.classList.remove('on');
+  history.length = 0; queue.length = 0; anim = null;
+  buildCubies();
+  var last = -1, seq = [];
+  for(var i=0;i<26;i++){
+    var ax, ly, dr;
+    do { ax = (Math.random()*3)|0; } while(ax === last);
+    last = ax;
+    ly = ((Math.random()*3)|0) - 1;
+    dr = Math.random() < 0.5 ? 1 : -1;
+    seq.push([ax,ly,dr]);
+  }
+  // apply instantly, then a short flourish so it reads as "shuffled"
+  for(var j=0;j<seq.length;j++) applyTurn(seq[j][0], seq[j][1], seq[j][2]);
+  moves = 0; elapsed = 0; running = false; scrambled = true; active = true; t0 = 0;
+  els.tMoves.textContent = '0'; els.tTime.textContent = '0:00';
+  toast('섞었습니다');
+}
+
+function reset(){
+  els.win.classList.remove('on');
+  history.length = 0; queue.length = 0; anim = null;
+  buildCubies();
+  moves = 0; elapsed = 0; running = false; scrambled = false; active = false;
+  els.tMoves.textContent = '0'; els.tTime.textContent = '0:00';
+  toast('초기화');
+}
+
+function undo(){
+  if(anim || queue.length) return;
+  var m = history.pop();
+  if(!m){ toast('되돌릴 수 없음'); return; }
+  startTurn(m[0], m[1], -m[2], false, true);
+  bumpMove();
+}
+
+// keyboard: standard face-turn notation
+var KEYMAP = { r:[0,1,-1], l:[0,-1,1], u:[1,1,-1], d:[1,-1,1], f:[2,1,-1], b:[2,-1,1],
+               m:[0,0,1], e:[1,0,1], s:[2,0,-1] };
+window.addEventListener('keydown', function(e){
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  var k = e.key.toLowerCase();
+  if(k===' '){ e.preventDefault(); scramble(); return; }
+  if(k==='z'){ e.preventDefault(); undo(); return; }
+  if(k==='escape'){ els.win.classList.remove('on'); return; }
+  if(KEYMAP[k]){
+    e.preventDefault();
+    var m = KEYMAP[k];
+    pushMove(m[0], m[1], e.shiftKey ? -m[2] : m[2]);
+  }
+  if(k==='arrowleft'){ viewT.yaw -= 0.28; }
+  if(k==='arrowright'){ viewT.yaw += 0.28; }
+  if(k==='arrowup'){ viewT.pitch = clamp(viewT.pitch - 0.24, -1.32, 1.32); }
+  if(k==='arrowdown'){ viewT.pitch = clamp(viewT.pitch + 0.24, -1.32, 1.32); }
+});
+
+document.getElementById('bScramble').onclick = scramble;
+document.getElementById('bReset').onclick = reset;
+document.getElementById('bUndo').onclick = undo;
+document.getElementById('bView').onclick = function(){ viewT.yaw = -0.62; viewT.pitch = 0.52; };
+document.getElementById('bAgain').onclick = function(){ scramble(); };
+document.getElementById('bClose').onclick = function(){ els.win.classList.remove('on'); };
+
+[['sShim','oShim'],['sFlow','oFlow'],['sSpeed','oSpeed']].forEach(function(pair){
+  var s = els[pair[0]], o = els[pair[1]];
+  s.addEventListener('input', function(){ o.textContent = s.value; });
+});
+
+canvas.addEventListener('dblclick', function(){ viewT.yaw = -0.62; viewT.pitch = 0.52; });
+canvas.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+
+// ════════════════════════════════════════════════════════════ loop
+var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var last = performance.now(), clock = 0, idle = 0;
+
+function frame(now){
+  var dt = Math.min(64, now - last); last = now;
+  if(!reduce) clock += dt/1000;
+
+  if(anim){
+    anim.t += dt;
+    if(anim.t >= anim.dur){
+      var a = anim; anim = null;
+      commitTurn(a);
+      if(queue.length){ var q = queue.shift(); startTurn(q[0],q[1],q[2],q[3],q[4]); }
+    }
+  }
+
+  if(running){ elapsed = now - t0; els.tTime.textContent = fmt(elapsed); }
+
+  // gentle auto-drift when the user is idle
+  if(!drag){ idle += dt; } else { idle = 0; }
+  if(!reduce && idle > 4500 && !anim){ viewT.yaw += dt * 0.00006; }
+
+  updateCamera();
+  updateGeometry();
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufPos);
+  gl.bufferSubData(gl.ARRAY_BUFFER, 0, aPos);
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufNrm);
+  gl.bufferSubData(gl.ARRAY_BUFFER, 0, aNrm);
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufTan);
+  gl.bufferSubData(gl.ARRAY_BUFFER, 0, aTan);
+
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.uniformMatrix4fv(uMVP, false, mvpM);
+  gl.uniformMatrix4fv(uModel, false, modelM);
+  gl.uniform3fv(uEye, new Float32Array(eye));
+  gl.uniform1f(uTime, clock);
+  gl.uniform1f(uShim, (+els.sShim.value)/100);
+  gl.uniform1f(uFlow, (+els.sFlow.value)/100);
+  gl.drawArrays(gl.TRIANGLES, 0, NVERT);
+
+  requestAnimationFrame(frame);
+}
+
+// opt-in inspection hook (used by the dev harness; harmless otherwise)
+if(/[?&]debug/.test(location.search)){
+  window.__prism = {
+    solved: isSolved,
+    state: function(){ return cubies.map(function(c){ return c.p.join(','); }).join('|'); },
+    move: function(a,l,d){ pushMove(a,l,d); },
+    pickAt: function(x,y){ return pick(x,y); },
+    lastMove: null,
+    flags: function(){ return { scrambled:scrambled, active:active, moves:moves, anim:!!anim }; }
+  };
+}
+
+resize();
+updateCamera();
+requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>
