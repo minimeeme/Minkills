@@ -122,10 +122,10 @@
     <kbd>U</kbd><kbd>D</kbd><kbd>L</kbd><kbd>R</kbd><kbd>F</kbd><kbd>B</kbd> 회전 · <kbd>Shift</kbd>+키 반대 방향 · <kbd>Space</kbd> 섞기 · <kbd>Z</kbd> 되돌리기
   </div>
   <div class="sliders">
-    <div class="sl"><label for="sShim">요동</label><input id="sShim" type="range" min="0" max="100" value="78"><output id="oShim">78</output></div>
-    <div class="sl"><label for="sFlow">흐름</label><input id="sFlow" type="range" min="0" max="100" value="55"><output id="oFlow">55</output></div>
-    <div class="sl"><label for="sSpeed">회전속도</label><input id="sSpeed" type="range" min="20" max="100" value="45"><output id="oSpeed">45</output></div>
-    <div class="sl"><label for="sTint">면 색</label><input id="sTint" type="range" min="0" max="100" value="18"><output id="oTint">18</output></div>
+    <div class="sl"><label for="sShim">요동</label><input id="sShim" type="range" min="0" max="100" value="57"><output id="oShim">57</output></div>
+    <div class="sl"><label for="sFlow">흐름</label><input id="sFlow" type="range" min="0" max="100" value="0"><output id="oFlow">0</output></div>
+    <div class="sl"><label for="sSpeed">회전속도</label><input id="sSpeed" type="range" min="20" max="100" value="40"><output id="oSpeed">40</output></div>
+    <div class="sl"><label for="sTint">면 색</label><input id="sTint" type="range" min="0" max="100" value="0"><output id="oTint">0</output></div>
   </div>
   <div class="row">
     <button id="bScramble" class="key">섞기</button>
@@ -245,7 +245,7 @@ function applyTurn(axis, layer, dir){
 
 function startTurn(axis, layer, dir, record, fast){
   if(anim) { queue.push([axis,layer,dir,record,fast]); return; }
-  var base = 430 - 2.7*(+els.sSpeed.value);   // 45 -> ~310ms
+  var base = 620 - 3.6*(+els.sSpeed.value);   // 40 -> ~476ms
   anim = { axis:axis, layer:layer, dir:dir, t:0, dur: fast? Math.max(48, base*0.42) : base, record:record };
 }
 
@@ -360,7 +360,7 @@ function updateGeometry(){
   var animR = null, aAxis = 0, aLayer = 0;
   if(anim){
     var e = anim.t/anim.dur; e = e<0?0:(e>1?1:e);
-    e = e<0.5 ? 16*e*e*e*e*e : 1-Math.pow(-2*e+2,5)/2;   // easeInOutQuint
+    e = 0.5 - 0.5*Math.cos(Math.PI*e);              // easeInOutSine
     animR = mRot(anim.axis, anim.dir*e*Math.PI/2);
     aAxis = anim.axis; aLayer = anim.layer;
   }
