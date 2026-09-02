@@ -6,13 +6,13 @@
 <title>Prism Cube</title>
 <style>
   :root{
-    --ink:#e8ecf5; --dim:#8b93a7; --line:rgba(255,255,255,.13);
-    --panel:rgba(14,16,22,.72); --accent:#a9c6ff;
+    --ink:#1b1e26; --dim:#71767f; --line:rgba(24,27,36,.16);
+    --panel:rgba(255,255,255,.74); --accent:#5850d8;
   }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0}
   body{
-    background:#07080c;
+    background:#e6e7ea;
     color:var(--ink);
     font-family:"Helvetica Neue",Inter,system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
     overflow:hidden; -webkit-tap-highlight-color:transparent;
@@ -26,7 +26,7 @@
   .hud > *{pointer-events:auto}
 
   #top{top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:18px 20px 34px;gap:16px;
-    background:linear-gradient(to bottom, rgba(5,3,11,.72), rgba(5,3,11,0))}
+    background:linear-gradient(to bottom, rgba(238,239,242,.86), rgba(238,239,242,0))}
   .mark{font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--dim);line-height:1.9}
   .mark b{display:block;font-size:15px;letter-spacing:.22em;color:var(--ink);font-weight:600}
   .stats{display:flex;gap:22px;text-align:right;font-variant-numeric:tabular-nums}
@@ -34,7 +34,7 @@
   .stat b{font-size:19px;font-weight:500;letter-spacing:.02em}
 
   #bottom{left:0;right:0;bottom:0;padding:26px 20px 22px;display:flex;flex-direction:column;gap:14px;align-items:center;
-    background:linear-gradient(to top, rgba(5,3,11,.88) 40%, rgba(5,3,11,0))}
+    background:linear-gradient(to top, rgba(232,233,237,.92) 42%, rgba(232,233,237,0))}
   .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
   button{
     font:inherit;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
@@ -43,9 +43,9 @@
     backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
     transition:border-color .18s, background .18s, transform .12s;
   }
-  button:hover{border-color:rgba(169,198,255,.55);background:rgba(24,28,40,.8)}
+  button:hover{border-color:rgba(88,80,216,.5);background:rgba(255,255,255,.92)}
   button:active{transform:translateY(1px)}
-  button.key{background:rgba(169,198,255,.14);border-color:rgba(169,198,255,.42)}
+  button.key{background:rgba(88,80,216,.12);border-color:rgba(88,80,216,.38);color:#3b34ad}
 
   .sliders{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;
     background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 18px;
@@ -54,10 +54,10 @@
   .sl label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
   .sl output{font-size:10.5px;color:var(--dim);width:2.4em;text-align:right;font-variant-numeric:tabular-nums}
   input[type=range]{-webkit-appearance:none;appearance:none;width:104px;height:20px;background:transparent;cursor:pointer}
-  input[type=range]::-webkit-slider-runnable-track{height:2px;background:rgba(255,255,255,.2);border-radius:2px}
+  input[type=range]::-webkit-slider-runnable-track{height:2px;background:rgba(24,27,36,.20);border-radius:2px}
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;
-    background:var(--accent);margin-top:-4.5px;box-shadow:0 0 10px rgba(169,198,255,.6)}
-  input[type=range]::-moz-range-track{height:2px;background:rgba(255,255,255,.2);border-radius:2px}
+    background:var(--accent);margin-top:-4.5px;box-shadow:0 1px 4px rgba(24,27,36,.28)}
+  input[type=range]::-moz-range-track{height:2px;background:rgba(24,27,36,.20);border-radius:2px}
   input[type=range]::-moz-range-thumb{width:11px;height:11px;border:0;border-radius:50%;background:var(--accent)}
 
   #help{font-size:11px;color:var(--dim);letter-spacing:.05em;text-align:center;line-height:1.8;max-width:560px}
@@ -67,7 +67,7 @@
   /* ---------- overlays ---------- */
   #win{
     position:fixed;inset:0;z-index:10;display:none;place-items:end center;padding-bottom:6vh;
-    background:radial-gradient(70% 60% at 50% 45%, rgba(10,12,20,.55), rgba(5,6,10,.86));
+    background:radial-gradient(70% 60% at 50% 45%, rgba(233,234,238,.62), rgba(226,227,232,.90));
     animation:fade .5s ease both;
     pointer-events:none;              /* the cube stays reachable behind the card */
   }
@@ -76,18 +76,19 @@
   #win .card{transform:translateY(0)}
   @keyframes fade{from{opacity:0}to{opacity:1}}
   .card{text-align:center;padding:38px 44px;border:1px solid var(--line);border-radius:22px;
-    background:rgba(12,14,20,.78);max-width:min(88vw,440px)}
+    background:rgba(255,255,255,.88);box-shadow:0 18px 50px rgba(24,27,36,.16);max-width:min(88vw,440px)}
   .card h2{margin:0 0 6px;font-size:13px;letter-spacing:.4em;text-transform:uppercase;color:var(--accent);font-weight:500}
   .card .big{font-size:34px;font-weight:300;letter-spacing:.02em;margin:10px 0 2px;font-variant-numeric:tabular-nums}
   .card p{margin:14px 0 0;font-size:12.5px;color:var(--dim);line-height:1.9;letter-spacing:.04em}
-  .card .reward{margin-top:20px;padding:14px 16px;border:1px dashed rgba(169,198,255,.34);border-radius:12px;
+  .card .reward{margin-top:20px;padding:14px 16px;border:1px dashed rgba(88,80,216,.36);border-radius:12px;
     font-size:11.5px;letter-spacing:.14em;color:var(--accent);text-transform:uppercase}
   .card .row{margin-top:22px}
 
   #toast{
     position:fixed;left:50%;top:78px;transform:translateX(-50%);z-index:8;
     font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);
-    background:var(--panel);border:1px solid rgba(169,198,255,.3);border-radius:999px;padding:8px 16px;
+    background:rgba(255,255,255,.9);border:1px solid rgba(88,80,216,.28);border-radius:999px;padding:8px 16px;
+    box-shadow:0 4px 16px rgba(24,27,36,.10);
     opacity:0;transition:opacity .3s;pointer-events:none;
   }
   #toast.on{opacity:1}
@@ -123,7 +124,7 @@
   <div class="sliders">
     <div class="sl"><label for="sShim">요동</label><input id="sShim" type="range" min="0" max="100" value="78"><output id="oShim">78</output></div>
     <div class="sl"><label for="sFlow">흐름</label><input id="sFlow" type="range" min="0" max="100" value="55"><output id="oFlow">55</output></div>
-    <div class="sl"><label for="sSpeed">회전속도</label><input id="sSpeed" type="range" min="20" max="100" value="62"><output id="oSpeed">62</output></div>
+    <div class="sl"><label for="sSpeed">회전속도</label><input id="sSpeed" type="range" min="20" max="100" value="45"><output id="oSpeed">45</output></div>
     <div class="sl"><label for="sTint">면 색</label><input id="sTint" type="range" min="0" max="100" value="18"><output id="oTint">18</output></div>
   </div>
   <div class="row">
@@ -244,7 +245,7 @@ function applyTurn(axis, layer, dir){
 
 function startTurn(axis, layer, dir, record, fast){
   if(anim) { queue.push([axis,layer,dir,record,fast]); return; }
-  var base = 260 - 1.9*(+els.sSpeed.value);   // 62 -> ~142ms
+  var base = 430 - 2.7*(+els.sSpeed.value);   // 45 -> ~310ms
   anim = { axis:axis, layer:layer, dir:dir, t:0, dur: fast? Math.max(48, base*0.42) : base, record:record };
 }
 
@@ -359,7 +360,7 @@ function updateGeometry(){
   var animR = null, aAxis = 0, aLayer = 0;
   if(anim){
     var e = anim.t/anim.dur; e = e<0?0:(e>1?1:e);
-    e = e<0.5 ? 4*e*e*e : 1-Math.pow(-2*e+2,3)/2;   // easeInOutCubic
+    e = e<0.5 ? 16*e*e*e*e*e : 1-Math.pow(-2*e+2,5)/2;   // easeInOutQuint
     animR = mRot(anim.axis, anim.dir*e*Math.PI/2);
     aAxis = anim.axis; aLayer = anim.layer;
   }
@@ -442,12 +443,23 @@ var FS = [
 '  return s;',
 '}',
 // spectral response — soft rainbow ramp
+// four-key cyclic ramp — gold, mint, sky, lavender. No magenta in the gamut,
+// so the fringes never pick up a pink cast.
 'vec3 spectrum(float t){',
-'  return 0.5 + 0.5*cos(6.28318*(t + vec3(0.0, 0.33, 0.67)));',
+'  float u = fract(t) * 4.0;',
+'  vec3 k0 = vec3(1.00, 0.90, 0.62);',
+'  vec3 k1 = vec3(0.58, 1.00, 0.88);',
+'  vec3 k2 = vec3(0.60, 0.84, 1.00);',
+'  vec3 k3 = vec3(0.82, 0.80, 1.00);',
+'  vec3 r = mix(k0, k1, smoothstep(0.0, 1.0, clamp(u,       0.0, 1.0)));',
+'  r      = mix(r,  k2, smoothstep(0.0, 1.0, clamp(u - 1.0, 0.0, 1.0)));',
+'  r      = mix(r,  k3, smoothstep(0.0, 1.0, clamp(u - 2.0, 0.0, 1.0)));',
+'  r      = mix(r,  k0, smoothstep(0.0, 1.0, clamp(u - 3.0, 0.0, 1.0)));',
+'  return r;',
 '}',
 // pastel version — high value, low saturation, the register the reference sits in
 'vec3 pastel(float t){',
-'  return 0.70 + 0.30*cos(6.28318*(t + vec3(0.0, 0.33, 0.67)));',
+'  return mix(vec3(1.0), spectrum(t), 0.72);',
 '}',
 // the six face identities, sampled off the reference sheet rather than spread
 // evenly round the wheel: peach, chartreuse, mint, aqua, periwinkle, rose
@@ -463,20 +475,21 @@ var FS = [
 // studio environment: overhead softbox, cool bounce, warm floor, a couple of strip lights
 'vec3 env(vec3 d){',
 '  float up = d.y*0.5 + 0.5;',
-'  vec3 c = mix(vec3(0.11,0.12,0.16), vec3(1.10,1.13,1.20), smoothstep(0.20,0.85,up));',
-'  c += vec3(1.00,1.01,1.04) * smoothstep(0.85,0.995,up) * 0.58;',
+'  vec3 c = mix(vec3(0.24,0.26,0.31), vec3(1.00,1.03,1.09), smoothstep(0.16,0.86,up));',
+'  c += vec3(1.00,1.01,1.04) * smoothstep(0.85,0.995,up) * 0.34;',
 '  c += vec3(0.20,0.28,0.46) * smoothstep(0.46,0.14,up);',
-'  c += vec3(0.44,0.25,0.15) * pow(1.0-up, 5.0);',
+'  c += vec3(0.30,0.27,0.22) * pow(1.0-up, 4.0);',
 '  c += vec3(0.58) * pow(max(0.0, sin(d.y*7.4 + 1.6)), 24.0);',
 '  c += vec3(0.36) * pow(max(0.0, sin(d.x*5.1 - 0.4)), 30.0);',
 '  return c;',
 '}',
 // surface height field — three pattern families drawn from the reference sheet
 'float surf(vec2 x, float t, float sd, float fam){',
-'  float a = fbm(x*1.12 + sd);',
-'  float b = 0.5 + 0.5*sin(length(x*1.75)*3.1 - t*1.05 + sd);',
-'  float c = 0.5 + 0.5*sin(dot(x, vec2(2.25,1.55)) + t*0.78 + sd*2.0);',
-'  return mix(mix(a, b, smoothstep(0.30,0.60,fam)), c, smoothstep(0.62,0.94,fam));',
+'  float a = fbm(x*0.82 + sd);',
+'  float b = 0.5 + 0.5*sin(length(x*1.45)*2.35 - t*0.82 + sd);',
+'  float c = 0.5 + 0.5*sin(dot(x, vec2(1.62,1.12)) + t*0.60 + sd*2.0);',
+'  float h = mix(mix(a, b, smoothstep(0.30,0.60,fam)), c, smoothstep(0.62,0.94,fam));',
+'  return h*h*(3.0 - 2.0*h);',                 // round the field off — no hard shoulders
 '}',
 
 'void main(){',
@@ -492,25 +505,28 @@ var FS = [
 '  float face  = vF - 10.0*inner;',
 
 // ---- holographic surface -------------------------------------------------
-'  float t   = uTime * (0.20 + 1.05*uFlow);',
+'  float t   = uTime * (0.14 + 0.78*uFlow);',
 '  float sd2 = vS * 29.0;',
 '  float fam = abs(fract(vS*1.85 + uTime*0.030*uFlow)*2.0 - 1.0);',
 '  vec2  q   = p * 1.30;',
 
 // domain warp -> liquid chrome flow
-'  float w1 = fbm(q*1.20 + vec2(t*0.50, -t*0.30) + sd2);',
-'  float w2 = fbm(q*1.20 + vec2(-t*0.36, t*0.46) + sd2 + 5.1);',
-'  vec2  qw = q + (0.32 + 0.55*uFlow) * vec2(w1 - 0.5, w2 - 0.5);',
+'  float w1 = fbm(q*0.80 + vec2(t*0.30, -t*0.20) + sd2);',
+'  float w2 = fbm(q*0.80 + vec2(-t*0.22, t*0.26) + sd2 + 5.1);',
+// a big, vertically stretched warp plus a steady downward crawl: the forms sag
+// and draw out like something slowly giving way
+'  float melt = 0.62 + 1.15*uFlow;',
+'  vec2  qw = q + melt * vec2((w1 - 0.5)*0.72, (w2 - 0.5)*1.45) + vec2(0.0, t*0.115);',
 
 // height field + analytic gradient -> the surface actually has relief
-'  float e  = 0.045;',
+'  float e  = 0.055;',
 '  float h0 = surf(qw, t, sd2, fam);',
 '  float hx = surf(qw + vec2(e,0.0), t, sd2, fam);',
 '  float hy = surf(qw + vec2(0.0,e), t, sd2, fam);',
-'  float bump = 0.86 + 1.00*uShim;',
+'  float bump = 0.62 + 0.72*uShim;',
 '  vec3  T = normalize(vT - N*dot(N,vT));',
 '  vec3  B = cross(N, T);',
-'  vec3  Np = normalize(N + (T*(h0-hx) + B*(h0-hy)) * 4.3 * bump);',
+'  vec3  Np = normalize(N + (T*(h0-hx) + B*(h0-hy)) * 3.4 * bump);',
 
 '  float ndvp = clamp(dot(Np,V), 0.0, 1.0);',
 '  float fresP = pow(1.0 - ndvp, 3.0);',
@@ -532,10 +548,10 @@ var FS = [
 
 // The reference is a neutral silver ground; the rainbow only rides the creases.
 // Dispersion is therefore weighted by how hard the surface is bending here.
-'  vec3 silver = mix(vec3(dot(chrome, vec3(0.299,0.587,0.114))), chrome, 0.10) * 1.22;',
-'  float bend = clamp(length(vec2(h0-hx, h0-hy)) * 11.0, 0.0, 1.0);',
+'  vec3 silver = mix(vec3(dot(chrome, vec3(0.299,0.587,0.114))), chrome, 0.10) * 1.30;',
+'  float bend = clamp(length(vec2(h0-hx, h0-hy)) * 16.0, 0.0, 1.0);',
 '  float ir = (0.085 + 0.62*bend) * (0.62 + 0.52*uShim);',
-'  vec3 col = silver * (1.0 + (slick - 0.5) * ir);',
+'  vec3 col = silver * (1.0 + (slick - dot(slick, vec3(0.3333))) * ir * 2.3);',
 
 // identity cast — the one thing you can actually sort the cube by.
 // it drifts a little so a glance is never enough, but the ordering never inverts.
@@ -548,7 +564,7 @@ var FS = [
 '  vec3 L1 = normalize(vec3(-0.40, 0.88, 0.58));',
 '  vec3 L2 = normalize(vec3(0.72, 0.30, -0.52));',
 '  vec3 H1 = normalize(L1 + V), H2 = normalize(L2 + V);',
-'  col += vec3(1.0,0.99,0.97) * pow(max(dot(Np,H1),0.0), 60.0) * 1.30;',
+'  col += vec3(1.0,0.99,0.97) * pow(max(dot(Np,H1),0.0), 60.0) * 1.05;',
 '  col += mix(vec3(1.0), slick, 0.30) * pow(max(dot(Np,H2),0.0), 24.0) * 0.60;',
 
 // rim: prismatic edge catch
@@ -557,7 +573,7 @@ var FS = [
 
 // tone
 '  col *= mix(1.0, 0.42, inner);',
-'  col = col / (1.0 + col*0.26);',
+'  col = col / (1.0 + col*0.44);',
 '  col = pow(max(col, 0.0), vec3(0.88));',
 
 '  gl_FragColor = vec4(col, 1.0);',
@@ -586,63 +602,16 @@ var BG_FS = [
 'precision highp float;',
 'varying vec2 vP;',
 'uniform float uTime; uniform float uAsp; uniform float uPx;',
-
 'void main(){',
 '  vec2 p = vec2(vP.x*uAsp, vP.y);',
-'  float HZ = 0.16;',                       // horizon height in NDC
-'  vec3 col;',
-
-// ── sky ──────────────────────────────────────────────────────────────────
-'  float up = clamp((p.y - HZ) / (1.0 - HZ), 0.0, 1.0);',
-'  vec3 sky = mix(vec3(0.196,0.075,0.243), vec3(0.043,0.031,0.110), pow(up, 0.72));',
-'  sky += vec3(0.130,0.035,0.098) * pow(1.0 - up, 5.0);',
-
-// ── the sun, sitting on the horizon off to the right ──────────────────────
-'  vec2  sc = vec2(uAsp*0.58, HZ);',
-'  float R  = 0.30 + 0.11*uAsp;',
-'  vec2  sv = (p - sc) / R;',
-'  float sr = length(sv);',
-'  float disc = smoothstep(1.0, 0.975, sr);',
-// vertical ramp: amber at the base, magenta at the crown
-'  float sy = clamp(sv.y*0.5 + 0.5, 0.0, 1.0);',
-'  vec3 sunC = mix(vec3(1.00,0.62,0.16), vec3(0.98,0.22,0.52), pow(sy, 0.85));',
-// scanline slits, widening toward the bottom the way the poster art does
-// slits across the lower half of the disc, thinning as they climb
-'  float q = clamp(sv.y, 0.0, 1.0);',
-'  float g = fract(q * 9.0);',
-'  float thick = mix(0.58, 0.0, smoothstep(0.0, 0.62, q));',
-'  disc *= step(thick, g);',
-'  sky = mix(sky, sunC, disc);',
-'  sky += sunC * 0.30 * exp(-max(sr - 1.0, 0.0) * 5.2);',   // glow
-
-// ── floor: a perspective grid. Adding to the world coordinate slides the
-//    lines right to left, and the shift on screen is 1/depth, so motion falls
-//    to zero at the vanishing point.
-'  float below = HZ - p.y;',
-'  if(below <= 0.0){',
-'    col = sky;',
-'  } else {',
-'    float H  = 3.0;',                                // eye height above the deck
-'    float d  = H / max(below, 1e-4);',               // depth
-'    float wx = p.x * d + uTime * 0.72;',             // lateral world coord, sliding
-'    float lx = abs(fract(wx + 0.5) - 0.5);',         // world distance to nearest line
-'    float lz = abs(fract(d  + 0.5) - 0.5);',
-'    float w  = 2.4 * uPx;',
-'    float gx = 1.0 - smoothstep(0.0, w, lx / d);',           // screen width of the line
-'    float gz = 1.0 - smoothstep(0.0, w, H * lz / (d*d));',
-'    float grid = max(gx, gz);',
-'    float fade = exp(-d * 0.035);',                  // distant lines dissolve into haze
-'    grid *= fade;',
-'    vec3 gc = mix(vec3(0.36,0.97,1.00), vec3(0.92,0.34,1.00), clamp(d*0.030, 0.0, 1.0));',
-'    vec3 floorC = mix(vec3(0.062,0.022,0.098), vec3(0.020,0.010,0.045), clamp(d*0.020, 0.0, 1.0));',
-'    floorC += sunC * 0.22 * exp(-abs(p.x - sc.x)*1.15) * fade;',  // sun laid out on the deck
-'    col = floorC + gc * grid * 0.66;',
-'    col += vec3(0.58,0.22,0.66) * exp(-below*7.0) * 0.95;',       // horizon haze
-'  }',
-
-'  if(p.y >= HZ) col = sky;',
-'  col *= 1.0 - 0.34*smoothstep(0.55, 1.85, length(p));',
-'  gl_FragColor = vec4(col*0.78, 1.0);',
+// a light grey ground, barely graded so it never reads as a gradient effect
+'  vec3 col = mix(vec3(0.874,0.878,0.890), vec3(0.945,0.949,0.957),',
+'                 smoothstep(-1.05, 0.95, p.y));',
+// soft pool under the cube so it sits on the ground instead of floating
+'  vec2 sp = vec2(p.x/0.95, (p.y + 0.34)/0.30);',
+'  col -= 0.052 * exp(-dot(sp, sp));',
+'  col *= 1.0 - 0.030*smoothstep(0.55, 1.85, length(p));',
+'  gl_FragColor = vec4(col, 1.0);',
 '}'].join('\n');
 
 var bgProg = gl.createProgram();
@@ -705,8 +674,8 @@ var modelM = mIdent(), mvpM = mIdent(), projM = mIdent(), viewM = mIdent();
 var eye = [0,0,8.6];
 
 function updateCamera(){
-  view.yaw   += (viewT.yaw - view.yaw) * 0.18;
-  view.pitch += (viewT.pitch - view.pitch) * 0.18;
+  view.yaw   += (viewT.yaw - view.yaw) * 0.10;
+  view.pitch += (viewT.pitch - view.pitch) * 0.10;
   modelM = mMul(mRot(1, view.yaw), mIdent(), new Float32Array(16));
   modelM = mMul(mRot(0, view.pitch), modelM, new Float32Array(16));
   eye = [0, view.cy, view.dist];
@@ -807,7 +776,7 @@ canvas.addEventListener('pointermove', function(e){
   var pt = ptr(e);
   if(drag.mode === 'orbit'){
     viewT.yaw   = drag.yaw0 + (pt[0]-drag.start[0]) * 0.0085;
-    viewT.pitch = clamp(drag.pitch0 + (pt[1]-drag.start[1]) * 0.0085, -1.32, 1.32);
+    viewT.pitch = drag.pitch0 + (pt[1]-drag.start[1]) * 0.0085;
   } else if(!drag.done){
     var dx = pt[0]-drag.start[0], dy = pt[1]-drag.start[1];
     if(Math.hypot(dx,dy) < 14) return;
@@ -910,7 +879,7 @@ function toast(msg){
 
 function scramble(){
   els.win.classList.remove('on');
-  history.length = 0; queue.length = 0; anim = null;
+  history.length = 0; queue.length = 0; anim = null; pendingUndo = 0;
   buildCubies();
   var last = -1, seq = [];
   for(var i=0;i<26;i++){
@@ -930,17 +899,26 @@ function scramble(){
 
 function reset(){
   els.win.classList.remove('on');
-  history.length = 0; queue.length = 0; anim = null;
+  history.length = 0; queue.length = 0; anim = null; pendingUndo = 0;
   buildCubies();
   moves = 0; elapsed = 0; running = false; scrambled = false; active = false;
   els.tMoves.textContent = '0'; els.tTime.textContent = '0:00';
   toast('초기화');
 }
 
+// Undo can't pop mid-turn: the in-flight move isn't in history yet, so popping
+// would take the wrong entry. Bank the request instead of dropping it, and spend
+// it once the cube is idle — rapid clicks all land.
+var pendingUndo = 0;
 function undo(){
-  if(anim || queue.length) return;
+  if(!history.length && !pendingUndo){ toast('되돌릴 수 없음'); return; }
+  pendingUndo++;
+}
+function drainUndo(){
+  if(!pendingUndo || anim || queue.length) return;
+  pendingUndo--;
   var m = history.pop();
-  if(!m){ toast('되돌릴 수 없음'); return; }
+  if(!m){ pendingUndo = 0; return; }
   startTurn(m[0], m[1], -m[2], false, true);
   bumpMove();
 }
@@ -961,8 +939,8 @@ window.addEventListener('keydown', function(e){
   }
   if(k==='arrowleft'){ viewT.yaw -= 0.28; }
   if(k==='arrowright'){ viewT.yaw += 0.28; }
-  if(k==='arrowup'){ viewT.pitch = clamp(viewT.pitch - 0.24, -1.32, 1.32); }
-  if(k==='arrowdown'){ viewT.pitch = clamp(viewT.pitch + 0.24, -1.32, 1.32); }
+  if(k==='arrowup'){ viewT.pitch -= 0.24; }
+  if(k==='arrowdown'){ viewT.pitch += 0.24; }
 });
 
 document.getElementById('bScramble').onclick = scramble;
@@ -997,10 +975,12 @@ function frame(now){
     }
   }
 
+  drainUndo();
+
   if(running){ elapsed = now - t0; els.tTime.textContent = fmt(elapsed); }
 
-  // slow continuous turn, paused only while the pointer is down
-  if(!reduce && !drag){ viewT.yaw += dt * 0.000090; }
+  // slow continuous tumble over the horizontal axis, paused while the pointer is down
+  if(!reduce && !drag){ viewT.pitch += dt * 0.000044; }
 
   updateCamera();
   updateGeometry();
