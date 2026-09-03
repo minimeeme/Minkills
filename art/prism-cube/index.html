@@ -93,44 +93,36 @@
 
   /* ---------- overlays ---------- */
   #win{
-    position:fixed;inset:0;z-index:10;display:none;place-items:end center;padding-bottom:6vh;
-    background:radial-gradient(70% 60% at 50% 45%, rgba(233,234,238,.94), rgba(226,227,232,.985));
-    animation:fade .5s ease both;
+    position:fixed;inset:0;z-index:10;display:none;place-items:end center;padding-bottom:4vh;
+    background:linear-gradient(to top, rgba(228,229,234,.97) 0%, rgba(230,231,236,.86) 34%,
+                               rgba(232,233,238,.30) 62%, rgba(232,233,238,0) 84%);
+    animation:fade .9s ease both;
     pointer-events:none;              /* the cube stays reachable behind the card */
   }
   #win .card{pointer-events:auto}
   #win.on{display:grid}
   #win .card{transform:translateY(0)}
   @keyframes fade{from{opacity:0}to{opacity:1}}
-  .card{text-align:center;padding:34px 20px;max-width:min(88vw,440px)}
+  .card{text-align:center;padding:20px 20px 26px;max-width:min(88vw,440px)}
   .card h2{margin:0 0 6px;font-family:var(--display);font-size:16px;letter-spacing:.24em;text-transform:uppercase;color:var(--accent);font-weight:700}
   .card .big{font-size:38px;font-weight:300;letter-spacing:.02em;margin:10px 0 2px;font-variant-numeric:tabular-nums}
-  .card p{margin:16px 0 0;font-size:12.5px;font-weight:300;color:var(--dim);line-height:1.9;letter-spacing:.04em}
-  .card{max-height:88vh;overflow-y:auto}
+  .card p{margin:13px 0 0;font-size:12.5px;font-weight:300;color:var(--dim);line-height:1.9;letter-spacing:.04em}
+  .card{max-height:52vh;overflow-y:auto;padding-top:8px}
 
-  /* the specimen: the surface the cube settled on, kept */
-  .spec{margin-top:24px;display:flex;flex-direction:column;align-items:center;gap:9px}
-  .spec .frame{width:112px;height:112px;border-radius:3px;background:var(--panel);
-    box-shadow:0 3px 18px rgba(24,27,36,.18);overflow:hidden}
-  .spec img{width:100%;height:100%;display:block;opacity:0;transition:opacity .45s ease}
-  .spec img.on{opacity:1}
-  .spec .code{font-size:11px;letter-spacing:.26em;color:var(--accent);font-weight:500}
-  .spec .note{font-size:10.5px;font-weight:300;letter-spacing:.04em;color:var(--dim);line-height:1.8;max-width:30ch}
+  .card p b{font-weight:500;color:var(--ink)}
+  .card .aside{margin-top:14px;font-size:11px;font-weight:300;letter-spacing:.05em;
+    color:var(--dim);line-height:1.85}
 
-  .rec{display:flex;gap:30px;justify-content:center;margin-top:22px;
+  .rec{display:flex;gap:30px;justify-content:center;margin-top:19px;
     font-size:9px;font-weight:300;letter-spacing:.22em;text-transform:uppercase;color:var(--dim)}
   .rec b{display:block;margin-top:5px;font-size:15px;font-weight:600;letter-spacing:.02em;
     color:var(--ink);font-variant-numeric:tabular-nums}
+  .rec .new{color:var(--accent)}
 
-  .shelf{margin-top:20px;display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
-  .shelf figure{margin:0;width:46px}
-  .shelf .tile{width:46px;height:46px;border-radius:2px;overflow:hidden;background:var(--panel)}
-  .shelf img{width:100%;height:100%;display:block;transform:scale(1.85);opacity:.86}
-  .shelf figcaption{margin-top:5px;font-size:8.5px;letter-spacing:.08em;color:var(--dim);
-    text-align:center;font-variant-numeric:tabular-nums}
-  .shelf .best .tile{outline:1px solid var(--accent);outline-offset:1px}
-  .shelf .best img{opacity:1}
-  .card .row{margin-top:22px}
+  .card .row{margin-top:19px}
+
+  body.won #bottom{opacity:0;pointer-events:none}
+  #bottom{transition:opacity .55s ease}
 
   #toast{
     position:fixed;left:50%;top:78px;transform:translateX(-50%);z-index:8;
@@ -185,21 +177,15 @@
   <div class="card">
     <h2>Solved</h2>
     <div class="big" id="wTime">0:00</div>
-    <p><span id="wMoves">0</span>수 · 표면이 계속 흔들리는 와중에 여섯 면을 맞췄습니다.</p>
-
-    <div class="spec">
-      <div class="frame"><img id="wShot" alt="맞춘 순간의 표면"></div>
-      <div class="code" id="wCode">&nbsp;</div>
-      <div class="note">이 표면은 다시 나오지 않습니다. 맞춘 자리에 그대로 멈춰 표본으로 남깁니다.</div>
-    </div>
+    <p><span id="wMoves">0</span>수 · 큐브가 열렸습니다. <b>안에 이게 있었어요.</b></p>
+    <div class="aside">여섯 면을 맞추면 껍데기는 흩어집니다.<br>남는 건 계속 여기 있던 쪽입니다.</div>
 
     <div class="rec">
       <div>최고 기록<b id="wBest">—</b></div>
       <div>최소 수<b id="wFewest">—</b></div>
-      <div>표본<b id="wCount">0</b></div>
+      <div>완성<b id="wCount">0</b></div>
     </div>
 
-    <div class="shelf" id="wShelf"></div>
     <div class="row">
       <button id="bAgain" class="key">다시 섞기</button>
       <button id="bClose">닫기</button>
@@ -250,6 +236,21 @@ function mRot(axis,ang){ // axis: 0=x,1=y,2=z
   if(axis===0){ m[5]=c; m[6]=s; m[9]=-s; m[10]=c; }
   else if(axis===1){ m[0]=c; m[2]=-s; m[8]=s; m[10]=c; }
   else { m[0]=c; m[1]=s; m[4]=-s; m[5]=c; }
+  return m;
+}
+function mAxis(a, ang){                    // Rodrigues, column-major
+  var c=Math.cos(ang), s=Math.sin(ang), t=1-c, x=a[0], y=a[1], z=a[2];
+  return new Float32Array([
+    t*x*x+c,   t*x*y+s*z, t*x*z-s*y, 0,
+    t*x*y-s*z, t*y*y+c,   t*y*z+s*x, 0,
+    t*x*z+s*y, t*y*z-s*x, t*z*z+c,   0,
+    0,0,0,1]);
+}
+function mCompose(t, R, s, out){          // translate * rotate * scale
+  var m = out || new Float32Array(16);
+  for(var c=0;c<3;c++) for(var r=0;r<3;r++) m[c*4+r] = R[c*4+r]*s[c];
+  m[3]=0; m[7]=0; m[11]=0;
+  m[12]=t[0]; m[13]=t[1]; m[14]=t[2]; m[15]=1;
   return m;
 }
 function vSub(a,b){ return [a[0]-b[0],a[1]-b[1],a[2]-b[2]]; }
@@ -448,6 +449,22 @@ function updateGeometry(){
       r00=b00; r01=b01; r02=b02; r10=b10; r11=b11; r12=b12; r20=b20; r21=b21; r22=b22;
       var nx = a00*tx+a01*ty+a02*tz, ny = a10*tx+a11*ty+a12*tz, nz = a20*tx+a21*ty+a22*tz;
       tx=nx; ty=ny; tz=nz;
+    }
+
+    // the reward takes the shell apart: each cubie tumbles about its own
+    // centre and leaves along its own line out of the middle
+    if(fly){
+      var F = fly[i], fm = F.m, fs = F.s;
+      var c00=fm[0], c01=fm[4], c02=fm[8],
+          c10=fm[1], c11=fm[5], c12=fm[9],
+          c20=fm[2], c21=fm[6], c22=fm[10];
+      var d00=c00*r00+c01*r10+c02*r20, d01=c00*r01+c01*r11+c02*r21, d02=c00*r02+c01*r12+c02*r22;
+      var d10=c10*r00+c11*r10+c12*r20, d11=c10*r01+c11*r11+c12*r21, d12=c10*r02+c11*r12+c12*r22;
+      var d20=c20*r00+c21*r10+c22*r20, d21=c20*r01+c21*r11+c22*r21, d22=c20*r02+c21*r12+c22*r22;
+      r00=d00*fs; r01=d01*fs; r02=d02*fs;
+      r10=d10*fs; r11=d11*fs; r12=d12*fs;
+      r20=d20*fs; r21=d21*fs; r22=d22*fs;
+      tx += F.o[0]; ty += F.o[1]; tz += F.o[2];
     }
 
     var base = i*VPC*3;
@@ -923,6 +940,288 @@ function bindBg(){
   attach(bgLocP, bgBuf, 2);
 }
 
+// ════════════════════════════════════════════════════════ what is inside
+// Six faces matched and the shell has no more work to do, so it comes apart —
+// and the thing it was wrapped around all along steps out of the light. The
+// piece carries no files, so the cat is built the way the cubies are: two
+// revolved meshes, a sphere and a teardrop, placed about thirty times over.
+//
+// Both meshes are generated from a parametric surface with normals taken from
+// the cross product of its two tangents, so a squashed sphere still shades
+// like the ellipsoid it is.
+function meshOf(fn, NU, NV){
+  var pos = [], nrm = [], e = 0.0025;
+  function nrmAt(u, v){
+    var a = fn(u, v);
+    var du = vSub(fn(u+e, v), fn(u-e, v));
+    var dv = vSub(fn(u, Math.min(1, v+e)), fn(u, Math.max(0, v-e)));
+    var n = vCross(du, dv);
+    var L = Math.hypot(n[0], n[1], n[2]);
+    n = L < 1e-7 ? vNorm(a) : [n[0]/L, n[1]/L, n[2]/L];
+    if(vDot(n, a) < 0) n = [-n[0], -n[1], -n[2]];    // both shapes wrap the origin
+    return n;
+  }
+  for(var iv=0; iv<NV; iv++) for(var iu=0; iu<NU; iu++){
+    var u0 = iu/NU, u1 = (iu+1)/NU, v0 = iv/NV, v1 = (iv+1)/NV;
+    var quad = [[u0,v0],[u1,v0],[u1,v1], [u0,v0],[u1,v1],[u0,v1]];
+    for(var k=0;k<6;k++){
+      var c = quad[k], p = fn(c[0], c[1]), n = nrmAt(c[0], c[1]);
+      pos.push(p[0], p[1], p[2]); nrm.push(n[0], n[1], n[2]);
+    }
+  }
+  return { pos:new Float32Array(pos), nrm:new Float32Array(nrm), n:pos.length/3 };
+}
+
+function sphereFn(u, v){
+  var a = u*Math.PI*2, b = v*Math.PI;
+  return [Math.sin(b)*Math.cos(a), Math.cos(b), Math.sin(b)*Math.sin(a)];
+}
+var MESH = [
+  // unit sphere — every soft part of the cat is one of these, squashed
+  meshOf(sphereFn, 22, 13),
+  // teardrop — the same revolution with the top drawn to a soft point: an ear
+  meshOf(function(u,v){
+    var a = u*Math.PI*2, b = v*Math.PI;
+    var r = Math.pow(Math.sin(b), 1 + 1.70*(1+Math.cos(b))*0.5);
+    return [r*Math.cos(a), Math.cos(b), r*Math.sin(a)];
+  }, 16, 11),
+  meshOf(sphereFn, 10, 7)          // the same ball for the parts nobody can count facets on
+];
+
+// cream, cream in shadow, ear-and-nose pink, eye, white, and the cube's own
+// silver for the tabby marks — the shell leaves its colour behind on the cat
+var FUR = [
+  [0.985,0.918,0.828], [0.900,0.826,0.742], [1.000,0.660,0.680],
+  [0.085,0.092,0.140], [1.000,0.990,0.975], [0.700,0.722,0.800]
+];
+
+// A part is: mesh, group it hangs off, offset, euler, half-extents, colour,
+// gloss, an optional tag the animator looks for, and — since a marking stuck on
+// as another ellipsoid would read as a lump — a second colour and a plane in
+// the part's own space to wash it in across. The bib, the muzzle, the saddle
+// and the pink inside an ear are all that one plane.
+// Groups: 0 body · 1 head · 2 tail. y is up and the cat faces +z.
+function P(m, g, t, r, s, c, gs, tag, c2, pat){
+  return { m:m, g:g, t:t, r:r, s:s, c:c, gs:gs||0, tag:tag||'',
+           c2:(c2 === undefined ? c : c2), pat:pat || [0,0,1,9] };
+}
+function mirrored(p, tag){                 // a proper rotation, not a reflection:
+  return P(p.m, p.g, [-p.t[0], p.t[1], p.t[2]],   // reflecting would invert the
+           [p.r[0], -p.r[1], -p.r[2]], p.s, p.c, p.gs,   // winding
+           tag || p.tag, p.c2, [-p.pat[0], p.pat[1], p.pat[2], p.pat[3]]);
+}
+function dir4(x, y, z, d){                 // a unit plane normal plus its offset
+  var L = Math.hypot(x,y,z) || 1;
+  return [x/L, y/L, z/L, d];
+}
+
+var CAT = (function(){
+  var L = [];
+  function add(){ for(var i=0;i<arguments.length;i++) L.push(arguments[i]); }
+  function pair(p, tagL, tagR){
+    var a = P(p.m,p.g,p.t,p.r,p.s,p.c,p.gs,tagL||p.tag,p.c2,p.pat);
+    add(a, mirrored(a, tagR || tagL || p.tag));
+  }
+
+  // ── body: a cat sat down, so the haunches are the widest thing on it ──
+  add(P(0,0,[0,0.34,-0.10],[0,0,0],[0.52,0.41,0.50],0,0,'',5, dir4(0,0.55,-1,0.34)),  // seat + saddle
+      P(0,0,[0,0.66,0.06], [0,0,0],[0.40,0.42,0.38],0,0,'',4, dir4(0,-0.50,1,0.36)),  // chest + bib
+      P(0,0,[0,0.95,0.05], [0,0,0],[0.25,0.20,0.25],0));                              // neck
+  pair(P(0,0,[0.34,0.28,-0.07],[0,0,0],[0.20,0.23,0.28],0));   // haunch
+  pair(P(0,0,[0.30,0.075,0.13],[0,0,0],[0.155,0.075,0.215],0));// hind foot
+  pair(P(0,0,[0.155,0.34,0.28],[0,0,0],[0.095,0.30,0.105],0)); // foreleg
+  pair(P(0,0,[0.155,0.078,0.33],[0,0,0],[0.115,0.080,0.155],0));// forepaw
+  pair(P(0,0,[0.155,0.052,0.45],[0,0,0],[0.044,0.028,0.032],2));// toe pad
+
+  // ── head: oversized on purpose, which is most of what makes it read cute ──
+  add(P(0,1,[0,0,0],[0,0,0],[0.47,0.44,0.43],0,0,'',5, dir4(0,0.80,-1,0.40)),   // skull + tabby cap
+      P(0,1,[0,-0.045,0.415],[0,0,0],[0.050,0.040,0.048],2,0.55));              // nose
+  pair(P(0,1,[0.080,-0.128,0.325],[0,0,0],[0.128,0.092,0.105],4));              // whisker pad
+  pair(P(0,1,[0.185,0.020,0.355],[0,0,0],[0.105,0.128,0.075],3,0.95,'eye'));
+  pair(P(0,1,[0.215,0.062,0.400],[0,0,0],[0.033,0.033,0.030],4,1.0,'eye'));
+  pair(P(0,1,[0.152,-0.020,0.398],[0,0,0],[0.018,0.018,0.017],4,1.0,'eye'));
+  pair(P(1,1,[0.290,0.385,0.015],[-0.16,0,-0.32],[0.165,0.300,0.110],0,0,'earL',
+          2, dir4(0,0,1,-0.10)), 'earL', 'earR');
+  for(var w=0; w<3; w++){                                       // whiskers
+    var pitch = 0.20 - w*0.20;
+    pair(P(0,1,[0.40,-0.10+pitch*0.30,0.22],[0,-0.34,pitch],[0.235,0.010,0.010],4,0.6,'whisk'));
+  }
+
+  // ── tail: wrapped round the right side and laid across the front paws ──
+  var TN = 17;                             // close enough together to read as a tube
+  for(var k=0; k<TN; k++){
+    var a  = k/(TN-1);
+    var th = 0.06 + a*(Math.PI*0.86 - 0.06);
+    var R  = 0.55 + 0.13*a;
+    var rr = 0.118 - 0.042*a*a;
+    var seg = P(0, 2, [R*Math.sin(th),
+                       0.03 + 0.09*Math.sin(a*Math.PI*0.75) + 0.30*Math.pow(a, 3.4),
+                       -R*Math.cos(th)], [0,0,0], [rr,rr,rr], 0, 0, 'tail');
+    seg.ta = a;                            // the sway grows towards the tip
+    add(seg);
+  }
+  return L;
+})();
+
+(function trimMesh(){
+  for(var i=0;i<CAT.length;i++){
+    var p = CAT[i];
+    if(p.m === 0 && Math.max(p.s[0], p.s[1], p.s[2]) < 0.12) p.m = 2;
+  }
+})();
+
+var CAT_SEG = (function(){                 // where each part's vertices live
+  var o = [0]; for(var i=0;i<MESH.length;i++) o.push(o[i] + MESH[i].n); return o;
+})();
+var catPos = new Float32Array(CAT_SEG[MESH.length]*3);
+var catNrm = new Float32Array(catPos.length);
+for(var mi=0; mi<MESH.length; mi++){
+  catPos.set(MESH[mi].pos, CAT_SEG[mi]*3);
+  catNrm.set(MESH[mi].nrm, CAT_SEG[mi]*3);
+}
+
+var CAT_VS = [
+'attribute vec3 aP; attribute vec3 aN;',
+'uniform mat4 uVP; uniform mat4 uM; uniform mat4 uNM;',
+'varying vec3 vN; varying vec3 vW; varying vec3 vL;',
+'void main(){',
+'  vec4 w = uM * vec4(aP, 1.0);',
+'  vW = w.xyz; vL = aP;',
+'  vN = normalize((uNM * vec4(aN, 0.0)).xyz);',
+'  gl_Position = uVP * w;',
+'}'].join('\n');
+
+// Plush, not chrome. The cube is a mirror; the thing inside it should read as
+// something you could pick up, so the light wraps a long way round the form and
+// the silhouette carries a fur halo instead of a hard edge.
+var CAT_FS = [
+'precision highp float;',
+'varying vec3 vN; varying vec3 vW; varying vec3 vL;',
+'uniform vec3 uEye; uniform vec3 uCol; uniform vec3 uCol2; uniform vec4 uPat;',
+'uniform float uGloss; uniform float uGlow;',
+'vec3 spectrum(float t){',
+'  float u = fract(t) * 4.0;',
+'  vec3 k0 = vec3(1.00,0.90,0.62), k1 = vec3(0.58,1.00,0.88);',
+'  vec3 k2 = vec3(0.60,0.84,1.00), k3 = vec3(0.82,0.80,1.00);',
+'  vec3 r = mix(k0,k1, smoothstep(0.0,1.0, clamp(u,      0.0,1.0)));',
+'  r      = mix(r, k2, smoothstep(0.0,1.0, clamp(u-1.0, 0.0,1.0)));',
+'  r      = mix(r, k3, smoothstep(0.0,1.0, clamp(u-2.0, 0.0,1.0)));',
+'  return   mix(r, k0, smoothstep(0.0,1.0, clamp(u-3.0, 0.0,1.0)));',
+'}',
+'void main(){',
+'  vec3 N = normalize(vN);',
+'  vec3 V = normalize(uEye - vW);',
+'  vec3 fur = mix(uCol, uCol2, smoothstep(uPat.w - 0.26, uPat.w + 0.26, dot(vL, uPat.xyz)));',
+'  float ndv = clamp(dot(N,V), 0.0, 1.0);',
+'  vec3 L1 = normalize(vec3(-0.40, 0.88, 0.58));',   // the studio key, same as the cube
+'  vec3 L2 = normalize(vec3(0.72, 0.26, -0.46));',   // cool kicker from behind
+// wrapped diffuse: light carries well past the terminator, which is what makes
+// a surface read as fibre rather than plastic
+'  float key  = clamp((dot(N,L1) + 0.34) / 1.34, 0.0, 1.0);',
+'  key = key*key*(3.0 - 2.0*key);',
+'  float fill = clamp((dot(N,L2) + 0.62) / 1.62, 0.0, 1.0);',
+'  float sky  = N.y*0.5 + 0.5;',
+'  vec3 amb = mix(vec3(0.20,0.22,0.30), vec3(0.86,0.88,0.96), smoothstep(0.02,0.95,sky));',
+'  amb += vec3(0.30,0.24,0.19) * pow(1.0-sky, 3.0);',            // warm bounce off the ground
+'  vec3 lit = fur * (amb*0.34 + key*0.84 + fill*0.19);',
+// fur halo: the silhouette lights up rather than ending, and takes a whisper of
+// the same dispersion the shell was made of
+'  float rim = pow(1.0 - ndv, 2.7);',
+'  lit += mix(vec3(1.0,0.96,0.90), spectrum(ndv*0.7 + vW.y*0.35), 0.40) * rim * (0.21 + 0.62*uGlow) * (1.0 - uGloss*0.75);',
+// eyes and nose are the only wet things on it
+'  vec3 H = normalize(L1 + V);',
+'  lit += vec3(1.0) * pow(max(dot(N,H),0.0), 40.0 + 90.0*uGloss) * (0.10 + 1.25*uGloss);',
+'  lit += vec3(0.90,0.95,1.0) * pow(max(dot(N, normalize(L2+V)),0.0), 30.0) * uGloss * 0.5;',
+// still holding the light it arrived in
+'  lit += fur * uGlow * (0.55 + 0.9*rim);',
+'  lit = lit / (1.0 + lit*0.24);',
+'  gl_FragColor = vec4(pow(max(lit,0.0), vec3(0.90)), 1.0);',
+'}'].join('\n');
+
+var catProg = gl.createProgram();
+gl.attachShader(catProg, sh(gl.VERTEX_SHADER, CAT_VS));
+gl.attachShader(catProg, sh(gl.FRAGMENT_SHADER, CAT_FS));
+gl.linkProgram(catProg);
+if(!gl.getProgramParameter(catProg, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(catProg));
+var caP = gl.getAttribLocation(catProg,'aP'), caN = gl.getAttribLocation(catProg,'aN');
+var caVP = gl.getUniformLocation(catProg,'uVP'),   caM = gl.getUniformLocation(catProg,'uM'),
+    caNM = gl.getUniformLocation(catProg,'uNM'),   caEye = gl.getUniformLocation(catProg,'uEye'),
+    caCol = gl.getUniformLocation(catProg,'uCol'), caCol2 = gl.getUniformLocation(catProg,'uCol2'),
+    caPat = gl.getUniformLocation(catProg,'uPat'), caGloss = gl.getUniformLocation(catProg,'uGloss'),
+    caGlow = gl.getUniformLocation(catProg,'uGlow');
+var catBufP = gl.createBuffer(), catBufN = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, catBufP); gl.bufferData(gl.ARRAY_BUFFER, catPos, gl.STATIC_DRAW);
+gl.bindBuffer(gl.ARRAY_BUFFER, catBufN); gl.bufferData(gl.ARRAY_BUFFER, catNrm, gl.STATIC_DRAW);
+
+// ── the light it comes out of: three additive billboards at the origin ──
+// The view basis is world-axis aligned, so a quad in the world xy plane already
+// faces the eye — no per-frame billboard basis needed.
+var GL_VS = [
+'attribute vec2 aQ;',
+'uniform mat4 uVP; uniform vec3 uC; uniform float uS;',
+'varying vec2 vQ;',
+'void main(){ vQ = aQ; gl_Position = uVP * vec4(uC + vec3(aQ*uS, 0.0), 1.0); }'].join('\n');
+
+var GL_FS = [
+'precision highp float;',
+'varying vec2 vQ;',
+'uniform float uK; uniform float uA; uniform vec3 uP;',
+'vec3 spectrum(float t){',
+'  float u = fract(t) * 4.0;',
+'  vec3 k0 = vec3(1.00,0.90,0.62), k1 = vec3(0.58,1.00,0.88);',
+'  vec3 k2 = vec3(0.60,0.84,1.00), k3 = vec3(0.82,0.80,1.00);',
+'  vec3 r = mix(k0,k1, smoothstep(0.0,1.0, clamp(u,      0.0,1.0)));',
+'  r      = mix(r, k2, smoothstep(0.0,1.0, clamp(u-1.0, 0.0,1.0)));',
+'  r      = mix(r, k3, smoothstep(0.0,1.0, clamp(u-2.0, 0.0,1.0)));',
+'  return   mix(r, k0, smoothstep(0.0,1.0, clamp(u-3.0, 0.0,1.0)));',
+'}',
+'void main(){',
+'  float r = length(vQ);',
+'  if(r > 1.0) discard;',
+'  float a = atan(vQ.y, vQ.x);',
+'  float m; vec3 c;',
+'  if(uK < 0.5){',                                  // core: white centre, spectral skirt
+'    float core = exp(-r*r*15.0);',
+'    float halo = exp(-r*r*2.4) * smoothstep(1.0, 0.35, r);',
+'    m = core*1.45 + halo*0.62;',
+'    c = mix(spectrum(a*0.159 + uP.x), vec3(1.0), clamp(core*2.1, 0.0, 1.0));',
+'  } else if(uK < 1.5){',                           // rays: six spokes over a soft cross
+'    float s6 = pow(abs(cos(a*3.0 + uP.x)), 22.0);',
+'    float s4 = pow(abs(cos(a*2.0 - uP.x*0.55)), 64.0);',
+'    float fall = exp(-r*2.7) * smoothstep(1.0, 0.03, r);',
+'    m = (s6*0.90 + s4*0.60) * fall * 1.8;',
+'    c = mix(vec3(1.0), spectrum(r*0.85 + uP.x*0.4), 0.48);',
+'  } else {',                                       // ring: the shell leaving
+'    float d = (r - uP.x) / max(uP.y, 0.001);',
+'    m = exp(-d*d);',
+'    c = mix(vec3(1.0), spectrum(a*0.159 + uP.z), 0.72);',
+'  }',
+'  gl_FragColor = vec4(c * m * uA, 1.0);',
+'}'].join('\n');
+
+var glProg = gl.createProgram();
+gl.attachShader(glProg, sh(gl.VERTEX_SHADER, GL_VS));
+gl.attachShader(glProg, sh(gl.FRAGMENT_SHADER, GL_FS));
+gl.linkProgram(glProg);
+if(!gl.getProgramParameter(glProg, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(glProg));
+var glQ = gl.getAttribLocation(glProg,'aQ');
+var glVP = gl.getUniformLocation(glProg,'uVP'), glC = gl.getUniformLocation(glProg,'uC'),
+    glS  = gl.getUniformLocation(glProg,'uS'),  glK = gl.getUniformLocation(glProg,'uK'),
+    glA  = gl.getUniformLocation(glProg,'uA'),  glP = gl.getUniformLocation(glProg,'uP');
+var glBuf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, glBuf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, 1,1, -1,-1, 1,1, -1,1]), gl.STATIC_DRAW);
+
+function bindCat(){
+  gl.disableVertexAttribArray(locTan); gl.disableVertexAttribArray(locSta);
+  attach(caP, catBufP, 3); attach(caN, catBufN, 3);
+}
+function bindGlow(){
+  gl.disableVertexAttribArray(locNrm); gl.disableVertexAttribArray(locTan);
+  gl.disableVertexAttribArray(locSta);
+  attach(glQ, glBuf, 2);
+}
+
 gl.enable(gl.DEPTH_TEST);
 gl.enable(gl.CULL_FACE);
 gl.cullFace(gl.BACK);
@@ -1013,6 +1312,7 @@ function screenRay(px, py){
 }
 
 function pick(px, py){
+  if(burst) return null;      // nothing to grab: look around instead
   var r = screenRay(px, py);
   var lim = 1.5*GAP, best = null;
   for(var f=0; f<6; f++){
@@ -1148,9 +1448,8 @@ var moves = 0, scrambled = false, running = false, t0 = 0, elapsed = 0, active =
 var els = {
   tTime: document.getElementById('tTime'), tMoves: document.getElementById('tMoves'),
   win: document.getElementById('win'), wTime: document.getElementById('wTime'), wMoves: document.getElementById('wMoves'),
-  wShot: document.getElementById('wShot'), wCode: document.getElementById('wCode'),
   wBest: document.getElementById('wBest'), wFewest: document.getElementById('wFewest'),
-  wCount: document.getElementById('wCount'), wShelf: document.getElementById('wShelf'),
+  wCount: document.getElementById('wCount'),
   bUndo: document.getElementById('bUndo'), bRedo: document.getElementById('bRedo'),
   toast: document.getElementById('toast')
 };
@@ -1170,6 +1469,10 @@ function bumpMove(){
 }
 
 function pushMove(axis, layer, dir, opts){
+  // Turning during the reward puts the shell back and carries straight on. The
+  // flight never touched the cube's state — only how it was drawn — so what
+  // comes back is exactly the cube you solved, and the move lands on it.
+  if(burst) clearBurst();
   opts = opts || {};
   if(window.__prism) window.__prism.lastMove = [axis, layer, dir];
   if(!opts.silent && future.length){ future.length = 0; }   // a new move drops the redo branch
@@ -1185,108 +1488,289 @@ function commitTurn(a){
 }
 
 // ════════════════════════════════════════════════════════════ reward
-// The surface is a function of one clock and never comes round again, so the
-// frame you solve on is the only one of its kind there will ever be. Solving
-// stops that clock and keeps the frame: a specimen, named after the moment it
-// was lifted from. The shelf holds the last few, and the fastest is marked.
-var SHELF_KEY = 'prismCube.shelf.v1', SHELF_MAX = 6;
-var frozen = false, freezeT = 0, bloom = 0, wantShot = null;
+// Solving is the last thing the shell is for. It holds for a beat, then the
+// twenty-six pieces let go of each other and leave — every one down its own
+// line out of the middle, which between them cover the whole sphere — and the
+// light they had been closed around gets out. The cat was what the light was.
+//
+// Three clocks: BT_HOLD is the beat before it goes, BT_CAT when the cat starts
+// arriving, BT_CARD when the card comes up. All measured from the solve.
+var BT_HOLD = 210, BT_CAT = 640, BT_CARD = 1850;
+var REC_KEY = 'prismCube.records.v1';
 
-function closeWin(){ els.win.classList.remove('on'); frozen = false; }
+var burst = false, bt = 0, fly = null;     // fly: per-cubie flight, or null
+var catIn = 0, catYaw = 0, catYawSet = false;
+var flash = 0, rays = 0, ringR = 0, ringA = 0, aura = 0, bloom = 0;
+var catGlow = 0, glowSpin = 0, burstE = 0, shellGone = false;
+var cardUp = false;
 
-// the clock names the specimen: same surface, same code, and no other
-function specimenCode(t, mv, ms){
-  var h = 2166136261, str = t.toFixed(4) + ':' + mv + ':' + ms;
-  for(var i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = (h * 16777619) >>> 0; }
-  var A = '0123456789ABCDEFGHJKLMNPRSTUVWXY';     // no I/O/Q/Z — reads cleanly
-  var out = '';
-  for(var k=0;k<4;k++){ out += A.charAt(h & 31); h >>>= 5; }
-  return 'PC-' + out;
+function closeWin(){                       // the cat stays behind it
+  els.win.classList.remove('on');
+  document.body.classList.remove('won');
 }
 
-// lift a square off the drawing buffer, centred on the cube rather than the
-// canvas — the camera keeps the cube clear of the controls, so those differ
-function captureSpecimen(){
-  var c = projectPt([0,0,0]);
-  var side = Math.round(Math.min(canvas.width, canvas.height) * 0.74);
-  var x = clamp(Math.round(c[0]*DPR - side/2), 0, Math.max(0, canvas.width - side));
-  var y = clamp(Math.round(canvas.height - c[1]*DPR - side/2), 0, Math.max(0, canvas.height - side));
-  var buf = new Uint8Array(side*side*4);
-  gl.readPixels(x, y, side, side, gl.RGBA, gl.UNSIGNED_BYTE, buf);
-  var tmp = document.createElement('canvas'); tmp.width = tmp.height = side;
-  var tc = tmp.getContext('2d');
-  var img = tc.createImageData(side, side);
-  for(var r=0; r<side; r++){                        // readPixels is bottom-up
-    var from = (side-1-r)*side*4;
-    img.data.set(buf.subarray(from, from + side*4), r*side*4);
+// Everything the reward changed, put back. Scramble and reset both come
+// through here, so the cube is whole again before either touches it.
+function clearBurst(){
+  burst = false; fly = null; bt = 0; catIn = 0; catYawSet = false;
+  flash = rays = ringA = aura = bloom = 0; cardUp = false;
+  els.win.classList.remove('on');
+  document.body.classList.remove('won');
+}
+
+// Each cubie leaves along the line from the middle through itself, so the
+// twenty-six directions already cover 360° without any of them being chosen.
+// A twist about y and a little lift turn the inflation into a burst.
+function armFlight(){
+  fly = [];
+  for(var i=0; i<26; i++){
+    var p = cubies[i].p, L = Math.hypot(p[0], p[1], p[2]);
+    var d = [p[0]/L, p[1]/L, p[2]/L];
+    var sw = 0.42, cs = Math.cos(sw), sn = Math.sin(sw);
+    d = vNorm([d[0]*cs + d[2]*sn, d[1] + 0.20, -d[0]*sn + d[2]*cs]);
+    fly.push({
+      d: d,
+      v: 6.6 + Math.random()*3.4,                     // launch speed
+      k: 0.75 + Math.random()*0.55,                   // the drift it keeps after
+      ax: vNorm([Math.random()*2-1, Math.random()*2-1, Math.random()*2-1]),
+      w: (Math.random() < 0.5 ? -1 : 1) * (5.0 + Math.random()*6.0),
+      j: Math.random()*6.283,                         // its own phase in the shiver
+      m: mIdent(), o: [0,0,0], s: 1
+    });
   }
-  tc.putImageData(img, 0, 0);
-  // 224 keeps the 112px specimen crisp on a 2x display and leaves the shelf
-  // something to crop into
-  var out = document.createElement('canvas'); out.width = out.height = 224;
-  var oc = out.getContext('2d');
-  oc.imageSmoothingEnabled = true; oc.imageSmoothingQuality = 'high';
-  oc.drawImage(tmp, 0, 0, 224, 224);
-  return out.toDataURL('image/jpeg', 0.74);
 }
 
-function readShelf(){
-  try{ var v = JSON.parse(localStorage.getItem(SHELF_KEY)); return Array.isArray(v) ? v : []; }
-  catch(e){ return []; }
-}
-function writeShelf(list){ try{ localStorage.setItem(SHELF_KEY, JSON.stringify(list)); }catch(e){} }
-
-function awardSpecimen(w){
-  var png = '';
-  try{ png = captureSpecimen(); }catch(e){}
-  var entry = { code: specimenCode(w.t, w.mv, w.ms), png: png, ms: w.ms, mv: w.mv, at: Date.now() };
-  var list = readShelf();
-  list.unshift(entry);
-  if(list.length > SHELF_MAX) list.length = SHELF_MAX;
-  writeShelf(list);
-  showReward(entry, list);
-}
-
-// built as nodes, not markup: the shelf comes back out of storage, and storage
-// is not a place to trust a string from
-function showReward(entry, list){
-  els.wCode.textContent = entry.code;
-  if(entry.png){ els.wShot.src = entry.png; els.wShot.classList.add('on'); }
-  var best = Infinity, fewest = Infinity;
-  for(var i=0;i<list.length;i++){
-    if(list[i].ms < best) best = list[i].ms;
-    if(list[i].mv < fewest) fewest = list[i].mv;
+// exponential drag: it shoots, then coasts. Nothing ever comes back.
+var FLY_TAU = 0.60;
+function updateFlight(hold, e){
+  var scale = reduce ? 0.34 : 1;
+  for(var i=0; i<26; i++){
+    var F = fly[i];
+    if(e <= 0){
+      // the beat before: the shell draws in on itself and shivers
+      var g = Math.sin(Math.PI * hold);
+      var q = 0.055 * g * Math.sin(hold*46 + F.j);
+      var pull = -0.085 * g;
+      F.o[0] = F.d[0]*pull + q; F.o[1] = F.d[1]*pull + q*0.7; F.o[2] = F.d[2]*pull - q;
+      F.m = mIdent(); F.s = 1;
+      continue;
+    }
+    var dist = (F.v * FLY_TAU * (1 - Math.exp(-e/FLY_TAU)) + F.k*e) * scale;
+    F.o[0] = F.d[0]*dist; F.o[1] = F.d[1]*dist; F.o[2] = F.d[2]*dist;
+    F.m = reduce ? mIdent() : mAxis(F.ax, F.w * e);
+    // they thin out as they go, so nothing crosses the eye and nothing is left
+    // hanging at the edge of the frame
+    var x = clamp((e - 0.50) / 0.62, 0, 1);
+    F.s = 1 - x*x*(3 - 2*x);
   }
-  els.wBest.textContent   = isFinite(best)   ? fmt(best)      : '—';
-  els.wFewest.textContent = isFinite(fewest) ? fewest + '수'  : '—';
-  els.wCount.textContent  = list.length;
+}
 
-  while(els.wShelf.firstChild) els.wShelf.removeChild(els.wShelf.firstChild);
-  for(var k=0;k<list.length;k++){
-    var e = list[k];
-    var fig = document.createElement('figure');
-    if(e.ms === best) fig.className = 'best';
-    fig.title = e.code;
-    var tile = document.createElement('div'); tile.className = 'tile';
-    var im = document.createElement('img');
-    if(typeof e.png === 'string' && e.png.indexOf('data:image/') === 0) im.src = e.png;
-    im.alt = e.code;
-    tile.appendChild(im);
-    var cap = document.createElement('figcaption');
-    cap.textContent = fmt(e.ms);
-    fig.appendChild(tile); fig.appendChild(cap);
-    els.wShelf.appendChild(fig);
-  }
+function readRec(){
+  try{ var v = JSON.parse(localStorage.getItem(REC_KEY)); return (v && typeof v === 'object') ? v : {}; }
+  catch(e){ return {}; }
+}
+
+function bankRecord(ms, mv){
+  var r = readRec();
+  var best = typeof r.best === 'number' ? r.best : Infinity;
+  var few  = typeof r.few  === 'number' ? r.few  : Infinity;
+  var n    = typeof r.n    === 'number' ? r.n    : 0;
+  var out = { best: Math.min(best, ms), few: Math.min(few, mv), n: n + 1,
+              newBest: ms < best, newFew: mv < few };
+  try{ localStorage.setItem(REC_KEY, JSON.stringify({best:out.best, few:out.few, n:out.n})); }catch(e){}
+  return out;
+}
+
+function showRecords(r){
+  els.wBest.textContent   = isFinite(r.best) ? fmt(r.best)     : '—';
+  els.wFewest.textContent = isFinite(r.few)  ? r.few + '수'    : '—';
+  els.wCount.textContent  = r.n;
+  els.wBest.className   = r.newBest ? 'new' : '';
+  els.wFewest.className  = r.newFew  ? 'new' : '';
 }
 
 function onSolved(){
   running = false; active = false; scrambled = false;
-  frozen = true; freezeT = 0;                 // hold the surface it came together on
   els.wTime.textContent = fmt(elapsed);
   els.wMoves.textContent = moves;
-  els.wShot.classList.remove('on'); els.wCode.innerHTML = '&nbsp;';
-  wantShot = { ms: elapsed, mv: moves, t: clock };
-  els.win.classList.add('on');
+  showRecords(bankRecord(elapsed, moves));
+  burst = true; bt = 0; cardUp = false;
+  armFlight();
+  syncControls();
+}
+
+
+// ── posing and drawing the cat ────────────────────────────────────────────
+// Nothing here is keyframed. The cat breathes, blinks, flicks an ear and lays
+// its tail over, all off the same clock, and it keeps its face turned towards
+// wherever you have orbited to — slowly enough that you can see it decide.
+var CAT_K = 1.10, CAT_Y = -0.66;   // a little above where the shell's middle was
+var CAT_POOL = (function(){ var a = []; for(var i=0;i<CAT.length*2+8;i++) a.push(new Float32Array(16)); return a; })();
+var CAT_ID = mIdent();
+
+function popScale(x){                       // 0 → 1 with one soft overshoot
+  if(x <= 0) return 0;
+  if(x >= 1) return 1;
+  return 1 - Math.exp(-6.2*x)*Math.cos(6.6*x);
+}
+function blinkK(t){                         // shut and open, once every few seconds
+  var c = t % 3.9;
+  if(c > 0.22) return 1;
+  return 0.10 + 0.90*Math.abs(Math.cos(c/0.22*Math.PI));
+}
+function twitch(t, off){                    // one ear, now and then
+  var c = (t + off) % 5.3;
+  return c < 0.34 ? 0.34*Math.sin(c/0.34*Math.PI*2)*Math.exp(-c*6.5) : 0;
+}
+function euler(rx, ry, rz, out){
+  if(rx === 0 && ry === 0 && rz === 0){ out.set(CAT_ID); return out; }
+  var t1 = mMul(mRot(0,rx), mRot(2,rz), CAT_POOL[CAT_POOL.length-1]);
+  return mMul(mRot(1,ry), t1, out);
+}
+
+// One clock drives all of it: the hold, the launch, the flash, the arrival and
+// the card. Everything else is a function of where that clock has got to.
+function updateBurst(dt){
+  if(!burst){ shellGone = false; return; }
+  bt += dt;
+  var holdS = (reduce ? 60 : BT_HOLD)/1000;
+  var T = bt/1000, e = T - holdS;
+  burstE = Math.max(0, e);
+  glowSpin += dt/1000 * 0.55;
+  updateFlight(clamp(T/holdS, 0, 1), e);
+
+  if(e <= 0){
+    bloom = 2.0 * Math.pow(T/holdS, 2.4);       // light gets into the grooves first
+    flash = rays = ringA = ringR = 0;
+  } else {
+    bloom = 2.6 * Math.exp(-e*4.0);
+    flash = Math.exp(-e*3.2) * (1 - Math.exp(-e*24.0));
+    rays  = Math.exp(-e*1.85) * (1 - Math.exp(-e*13.0));
+    ringR = 0.9 + 8.4*(1 - Math.exp(-e*2.0));
+    ringA = Math.exp(-e*2.1) * (1 - Math.exp(-e*18.0)) * 0.85;
+    if(reduce){ flash *= 0.30; rays *= 0.25; ringA *= 0.30; bloom *= 0.50; }
+  }
+  shellGone = e > (reduce ? 0.45 : 1.16);       // nothing left of it to draw
+
+  catIn = clamp((bt - (reduce ? 160 : BT_CAT)) / (reduce ? 240 : 720), 0, 1);
+  catGlow = catIn > 0 ? 0.95*Math.exp(-Math.max(0, e - 0.35)*2.0) : 0;
+  aura = catIn * (0.085 + 0.020*Math.sin(decoClock*1.4)) * (reduce ? 0.5 : 1);
+
+  if(!cardUp && bt >= (reduce ? 700 : BT_CARD)){
+    cardUp = true; els.win.classList.add('on'); document.body.classList.add('won');
+  }
+}
+
+function drawCat(t){
+  var ps = popScale(catIn);
+  if(ps <= 0.002) return;
+  var A = reduce ? 0 : 1;
+
+  // arriving: it stretches on the way up and settles, the way something
+  // landing on its feet does
+  var st = catIn < 1 ? 0.24*Math.exp(-4.0*catIn)*Math.sin(8.6*catIn) : 0;
+  var br = 0.013*Math.sin(t*2.05)*A;
+  var kx = CAT_K*ps*(1 - st*0.55 - br*0.5), ky = CAT_K*ps*(1 + st + br), kz = kx;
+
+  if(!catYawSet){ catYaw = -view.yaw; catYawSet = true; }
+  var dY = (-view.yaw + 0.09*Math.sin(t*0.31)*A) - catYaw;
+  dY = Math.atan2(Math.sin(dY), Math.cos(dY));        // the short way round
+  catYaw += dY * 0.035;
+
+  var pi = 0;
+  var Mb = mMul(modelM, mCompose([0, CAT_Y*ps, 0], mRot(1, catYaw), [kx,ky,kz], CAT_POOL[pi++]), CAT_POOL[pi++]);
+  var Nb = mMul(modelM, mCompose([0,0,0], mRot(1, catYaw), [1/kx,1/ky,1/kz], CAT_POOL[pi++]), CAT_POOL[pi++]);
+
+  var headTurn = clamp(dY, -0.7, 0.7)*0.55 + 0.06*Math.sin(t*0.73)*A;
+  // orbiting above it does not leave you looking at the top of its head
+  var headTip = -clamp(view.pitch, -0.45, 1.10)*0.62 + 0.030*Math.sin(t*1.10)*A;
+  var hR = euler(headTip, headTurn, 0.055*Math.sin(t*0.55)*A, CAT_POOL[pi++]);
+  var Mh = mMul(Mb, mCompose([0, 1.30 + 0.017*Math.sin(t*1.55)*A, 0.05 + 0.010*Math.sin(t*0.92)*A],
+                             hR, [1,1,1], CAT_POOL[pi++]), CAT_POOL[pi++]);
+  var Nh = mMul(Nb, hR, CAT_POOL[pi++]);
+
+  var tR = mRot(1, 0.13*Math.sin(t*1.15)*A);
+  var Mt = mMul(Mb, mCompose([0,0.10,0], tR, [1,1,1], CAT_POOL[pi++]), CAT_POOL[pi++]);
+  var Nt = mMul(Nb, tR, CAT_POOL[pi++]);
+
+  var GM = [Mb, Mh, Mt], GN = [Nb, Nh, Nt];
+  var bk = A ? blinkK(t) : 1;
+
+  gl.useProgram(catProg);
+  bindCat();
+  gl.uniformMatrix4fv(caVP, false, vpM);
+  gl.uniform3fv(caEye, new Float32Array(eye));
+  gl.uniform1f(caGlow, catGlow);
+
+  for(var i=0; i<CAT.length; i++){
+    var pa = CAT[i], tt = pa.t, rr = pa.r, ss = pa.s, tag = pa.tag;
+    if(tag === 'eye'){ ss = [ss[0], ss[1]*bk, ss[2]]; }
+    else if(tag === 'earL' || tag === 'earR'){
+      var tw = twitch(t, tag === 'earL' ? 0 : 2.6) * A;
+      rr = [rr[0], rr[1], rr[2] + (pa.t[0] > 0 ? -tw : tw)];
+    }
+    else if(tag === 'tail'){
+      var a = pa.ta, ph = t*1.35 - a*2.1;
+      tt = [tt[0], tt[1] + 0.090*a*a*Math.sin(ph)*A, tt[2] + 0.048*a*a*Math.cos(ph*0.8)*A];
+    }
+    var Rp = euler(rr[0], rr[1], rr[2], CAT_POOL[pi]);
+    var M = mMul(GM[pa.g], mCompose(tt, Rp, ss, CAT_POOL[pi+1]), CAT_POOL[pi+2]);
+    var N = mMul(GN[pa.g], mCompose([0,0,0], Rp, [1/ss[0],1/ss[1],1/ss[2]], CAT_POOL[pi+3]), CAT_POOL[pi+4]);
+    gl.uniformMatrix4fv(caM, false, M);
+    gl.uniformMatrix4fv(caNM, false, N);
+    gl.uniform3fv(caCol, FUR[pa.c]);
+    gl.uniform3fv(caCol2, FUR[pa.c2]);
+    gl.uniform4fv(caPat, pa.pat);
+    gl.uniform1f(caGloss, pa.gs);
+    gl.drawArrays(gl.TRIANGLES, CAT_SEG[pa.m], MESH[pa.m].n);
+  }
+}
+
+// The burst is drawn twice: once depth-tested, so the shell and the cat stand
+// in front of it and it reads as light coming from behind them, and once over
+// the top at a fraction of the strength, which is the glare in the room.
+function drawGlow(front){
+  var a = front ? 0.42 : 1.0;
+  // the front pass is the glare of the burst itself; once that is over there is
+  // only the halo behind the cat, and no reason to keep painting the frame twice
+  if(front && flash < 0.01 && rays < 0.01) return;
+  if(flash < 0.002 && rays < 0.002 && ringA < 0.002 && aura < 0.002) return;
+  gl.useProgram(glProg);
+  bindGlow();
+  gl.uniformMatrix4fv(glVP, false, vpM);
+  gl.uniform3f(glC, 0, 0.30*catIn, front ? 0.35 : -0.30);
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.ONE, gl.ONE);
+  gl.depthMask(false);
+  gl.disable(gl.CULL_FACE);
+  if(front) gl.disable(gl.DEPTH_TEST);
+
+  if(!front && ringA > 0.002){
+    gl.uniform1f(glK, 2); gl.uniform1f(glS, ringR); gl.uniform1f(glA, ringA*0.9);
+    gl.uniform3f(glP, 0.70, 0.045 + 0.075*clamp(ringR/9, 0, 1), glowSpin*0.4);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+  }
+  if(rays > 0.002){
+    gl.uniform1f(glK, 1); gl.uniform1f(glS, (front ? 6.2 : 4.6) + 2.4*(1-Math.exp(-burstE*1.6)));
+    gl.uniform1f(glA, rays*1.25*a); gl.uniform3f(glP, glowSpin, 0, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+  }
+  var core = flash*2.3 + aura;
+  if(core > 0.002){
+    // it opens out with the burst and closes back to a halo the size of the cat,
+    // rather than leaving a screen-wide additive pass running for ever
+    var wide = Math.min(1, flash*4.0 + rays*2.0);
+    gl.uniform1f(glK, 0);
+    gl.uniform1f(glS, (front ? 2.6 : 1.90) + 1.75*wide*(1-Math.exp(-burstE*2.6)));
+    gl.uniform1f(glA, core*a); gl.uniform3f(glP, glowSpin*0.3, 0, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+  }
+
+  if(front) gl.enable(gl.DEPTH_TEST);
+  gl.depthMask(true);
+  gl.enable(gl.CULL_FACE);
+  gl.disable(gl.BLEND);
+  gl.disableVertexAttribArray(glQ);
 }
 
 function fmt(ms){
@@ -1302,7 +1786,7 @@ function toast(msg){
 }
 
 function scramble(){
-  closeWin();
+  clearBurst();
   history.length = 0; queue.length = 0; future.length = 0; pending.length = 0; anim = null;
   buildCubies();
   var last = -1, seq = [];
@@ -1323,7 +1807,7 @@ function scramble(){
 }
 
 function reset(){
-  closeWin();
+  clearBurst();
   history.length = 0; queue.length = 0; future.length = 0; pending.length = 0; anim = null;
   buildCubies();
   moves = 0; elapsed = 0; running = false; scrambled = false; active = false;
@@ -1337,10 +1821,12 @@ function reset(){
 // dropping it and spend it once the cube is idle — rapid clicks all land.
 var future = [], pending = [];
 function undo(){
+  if(burst) clearBurst();
   if(!history.length && !pending.length){ toast('되돌릴 수 없음'); return; }
   pending.push(-1);
 }
 function redo(){
+  if(burst) clearBurst();
   if(!future.length && !pending.length){ toast('다시 실행할 수 없음'); return; }
   pending.push(1);
 }
@@ -1419,6 +1905,7 @@ function recenterView(){
 // stand the cube back up solved and run the real win path, so what appears is
 // the reward itself and not a mock-up of it
 function testerSolve(){
+  clearBurst();
   history.length = 0; queue.length = 0; future.length = 0; pending.length = 0; anim = null;
   buildCubies();
   scrambled = true;                      // arm the win check the way a run does
@@ -1447,14 +1934,8 @@ var last = performance.now(), clock = 0, decoClock = 0;
 
 function frame(now){
   var dt = Math.min(64, now - last); last = now;
-  if(frozen) freezeT += dt;
-  // the surface eases to a stop rather than snapping, and the prism swells once
-  var hold = frozen ? Math.max(0, 1 - freezeT/700) : 1;
-  if(!reduce){
-    decoClock += dt/1000;                      // the background keeps swimming
-    clock += (dt/1000) * hold * hold;
-  }
-  bloom = (frozen && !reduce) ? Math.sin(Math.PI * Math.min(1, freezeT/900)) : 0;
+  if(!reduce){ decoClock += dt/1000; clock += dt/1000; }
+  updateBurst(dt);
 
   if(anim){
     anim.t += dt;
@@ -1473,14 +1954,15 @@ function frame(now){
   if(!reduce && !drag){ viewT.pitch += dt * 0.000044; }
 
   updateCamera();
-  updateGeometry();
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, bufPos);
-  gl.bufferSubData(gl.ARRAY_BUFFER, 0, aPos);
-  gl.bindBuffer(gl.ARRAY_BUFFER, bufNrm);
-  gl.bufferSubData(gl.ARRAY_BUFFER, 0, aNrm);
-  gl.bindBuffer(gl.ARRAY_BUFFER, bufTan);
-  gl.bufferSubData(gl.ARRAY_BUFFER, 0, aTan);
+  if(!shellGone){
+    updateGeometry();
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufPos);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, aPos);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufNrm);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, aNrm);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufTan);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, aTan);
+  }
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -1493,6 +1975,7 @@ function frame(now){
   gl.drawArrays(gl.TRIANGLES, 0, 3);
   gl.enable(gl.DEPTH_TEST);
 
+  if(!shellGone){
   gl.useProgram(prog);
   bindCube();
   gl.uniformMatrix4fv(uMVP, false, mvpM);
@@ -1504,6 +1987,11 @@ function frame(now){
   gl.uniform1f(uTint, TINT);
   gl.uniform1f(uBloom, bloom);
   gl.drawArrays(gl.TRIANGLES, 0, NVERT);
+  }
+
+  // what the shell was closed around, and the light it was closed around it with
+  if(catIn > 0) drawCat(decoClock);
+  if(burst) drawGlow(false);
 
   // decoration last: depth-tested against the cube so it can pass behind it,
   // depth writes off and sorted far-to-near so the alpha composites cleanly
@@ -1524,12 +2012,7 @@ function frame(now){
   gl.disable(gl.BLEND);
   unbindDeco();
 
-  // the specimen is lifted after the surface settles, so what is kept is
-  // exactly what the cube is holding
-  if(wantShot && freezeT >= (reduce ? 0 : 700)){
-    var w = wantShot; wantShot = null;
-    awardSpecimen(w);
-  }
+  if(burst) drawGlow(true);
 
   requestAnimationFrame(frame);
 }
@@ -1538,6 +2021,7 @@ function frame(now){
 if(/[?&]debug/.test(location.search)){
   window.__prism = {
     solved: isSolved,
+    solve: testerSolve,
     state: function(){ return cubies.map(function(c){ return c.p.join(','); }).join('|'); },
     move: function(a,l,d){ pushMove(a,l,d); },
     pickAt: function(x,y){ return pick(x,y); },
@@ -1549,8 +2033,12 @@ if(/[?&]debug/.test(location.search)){
     deco: function(){ return DECO.map(function(D){ return { p:D.p.slice(), follow:+D.follow.toFixed(4), z:+D.depth.toFixed(3) }; }); },
     orbit: function(y,pi){ viewT.yaw = y; viewT.pitch = pi; },
     tester: function(){ return { run:recenterRun, since:Math.round(performance.now()-recenterLast) }; },
-    reward: function(){ return { frozen:frozen, freezeT:Math.round(freezeT), pending:!!wantShot,
-                                 bloom:+bloom.toFixed(3), clock:+clock.toFixed(3) }; },
+    reward: function(){ return { burst:burst, bt:Math.round(bt), catIn:+catIn.toFixed(3),
+                                 shellGone:shellGone, card:cardUp, flash:+flash.toFixed(3),
+                                 ring:+ringR.toFixed(2), bloom:+bloom.toFixed(3),
+                                 parts:CAT.length, verts:MESH[0].n + MESH[1].n }; },
+    fly: function(){ return fly && fly.map(function(F){
+                       return { o:F.o.map(function(v){ return +v.toFixed(3); }), s:+F.s.toFixed(3) }; }); },
     flags: function(){ return { scrambled:scrambled, active:active, moves:moves, anim:!!anim }; }
   };
 }
