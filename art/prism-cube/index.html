@@ -1395,7 +1395,38 @@ document.getElementById('bScramble').onclick = scramble;
 document.getElementById('bReset').onclick = reset;
 document.getElementById('bUndo').onclick = undo;
 document.getElementById('bRedo').onclick = redo;
-document.getElementById('bView').onclick = function(){ viewT.yaw = -0.62; viewT.pitch = 0.52; zoomT = ZOOM_START; };
+// A tester's way in: ten Recenters in a row opens the solved card, so the
+// reward can be looked at without solving the cube first. Scramble applies its
+// turns without recording them — a fresh start has no history behind it — so
+// undo cannot walk a scrambled cube back, and there was no quick way through.
+// Nothing marks this on screen; the run has to be deliberate to land.
+// 3s between presses: a run should survive hesitating over the button, and
+// ten presses that far apart is nobody's accident. The count stays silent
+// until the seventh, by which point the run is plainly on purpose — before
+// that there is nothing on screen to find.
+var TESTER_HITS = 10, TESTER_GAP = 3000, TESTER_HINT = 7;
+var recenterRun = 0, recenterLast = 0;
+
+function recenterView(){
+  viewT.yaw = -0.62; viewT.pitch = 0.52; zoomT = ZOOM_START;
+  var now = performance.now();
+  recenterRun = (now - recenterLast > TESTER_GAP) ? 1 : recenterRun + 1;
+  recenterLast = now;
+  if(recenterRun >= TESTER_HITS){ recenterRun = 0; testerSolve(); }
+  else if(recenterRun >= TESTER_HINT) toast(String(TESTER_HITS - recenterRun));
+}
+
+// stand the cube back up solved and run the real win path, so what appears is
+// the reward itself and not a mock-up of it
+function testerSolve(){
+  history.length = 0; queue.length = 0; future.length = 0; pending.length = 0; anim = null;
+  buildCubies();
+  scrambled = true;                      // arm the win check the way a run does
+  syncControls();
+  onSolved();
+}
+
+document.getElementById('bView').onclick = recenterView;
 document.getElementById('bAgain').onclick = function(){ scramble(); };
 document.getElementById('bClose').onclick = closeWin;
 
@@ -1406,6 +1437,7 @@ canvas.addEventListener('wheel', function(e){
   nudgeZoom(Math.exp(Math.max(-60, Math.min(60, d)) * 0.0016));
 }, {passive:false});
 
+// double-click recentres too, but does not count toward the tester run
 canvas.addEventListener('dblclick', function(){ viewT.yaw = -0.62; viewT.pitch = 0.52; zoomT = ZOOM_START; });
 canvas.addEventListener('contextmenu', function(e){ e.preventDefault(); });
 
@@ -1516,6 +1548,7 @@ if(/[?&]debug/.test(location.search)){
     center: function(){ cyFrac = 0; },      // for stills shot with the HUD hidden
     deco: function(){ return DECO.map(function(D){ return { p:D.p.slice(), follow:+D.follow.toFixed(4), z:+D.depth.toFixed(3) }; }); },
     orbit: function(y,pi){ viewT.yaw = y; viewT.pitch = pi; },
+    tester: function(){ return { run:recenterRun, since:Math.round(performance.now()-recenterLast) }; },
     reward: function(){ return { frozen:frozen, freezeT:Math.round(freezeT), pending:!!wantShot,
                                  bloom:+bloom.toFixed(3), clock:+clock.toFixed(3) }; },
     flags: function(){ return { scrambled:scrambled, active:active, moves:moves, anim:!!anim }; }
