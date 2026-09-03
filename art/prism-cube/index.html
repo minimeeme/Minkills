@@ -94,7 +94,7 @@
   /* ---------- overlays ---------- */
   #win{
     position:fixed;inset:0;z-index:10;display:none;place-items:end center;padding-bottom:6vh;
-    background:radial-gradient(70% 60% at 50% 45%, rgba(233,234,238,.62), rgba(226,227,232,.90));
+    background:radial-gradient(70% 60% at 50% 45%, rgba(233,234,238,.94), rgba(226,227,232,.985));
     animation:fade .5s ease both;
     pointer-events:none;              /* the cube stays reachable behind the card */
   }
@@ -106,7 +106,30 @@
   .card h2{margin:0 0 6px;font-family:var(--display);font-size:16px;letter-spacing:.24em;text-transform:uppercase;color:var(--accent);font-weight:700}
   .card .big{font-size:38px;font-weight:300;letter-spacing:.02em;margin:10px 0 2px;font-variant-numeric:tabular-nums}
   .card p{margin:16px 0 0;font-size:12.5px;font-weight:300;color:var(--dim);line-height:1.9;letter-spacing:.04em}
-  .card .reward{margin-top:22px;font-size:11.5px;letter-spacing:.2em;color:var(--accent);text-transform:uppercase}
+  .card{max-height:88vh;overflow-y:auto}
+
+  /* the specimen: the surface the cube settled on, kept */
+  .spec{margin-top:24px;display:flex;flex-direction:column;align-items:center;gap:9px}
+  .spec .frame{width:112px;height:112px;border-radius:3px;background:var(--panel);
+    box-shadow:0 3px 18px rgba(24,27,36,.18);overflow:hidden}
+  .spec img{width:100%;height:100%;display:block;opacity:0;transition:opacity .45s ease}
+  .spec img.on{opacity:1}
+  .spec .code{font-size:11px;letter-spacing:.26em;color:var(--accent);font-weight:500}
+  .spec .note{font-size:10.5px;font-weight:300;letter-spacing:.04em;color:var(--dim);line-height:1.8;max-width:30ch}
+
+  .rec{display:flex;gap:30px;justify-content:center;margin-top:22px;
+    font-size:9px;font-weight:300;letter-spacing:.22em;text-transform:uppercase;color:var(--dim)}
+  .rec b{display:block;margin-top:5px;font-size:15px;font-weight:600;letter-spacing:.02em;
+    color:var(--ink);font-variant-numeric:tabular-nums}
+
+  .shelf{margin-top:20px;display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+  .shelf figure{margin:0;width:46px}
+  .shelf .tile{width:46px;height:46px;border-radius:2px;overflow:hidden;background:var(--panel)}
+  .shelf img{width:100%;height:100%;display:block;transform:scale(1.85);opacity:.86}
+  .shelf figcaption{margin-top:5px;font-size:8.5px;letter-spacing:.08em;color:var(--dim);
+    text-align:center;font-variant-numeric:tabular-nums}
+  .shelf .best .tile{outline:1px solid var(--accent);outline-offset:1px}
+  .shelf .best img{opacity:1}
   .card .row{margin-top:22px}
 
   #toast{
@@ -163,7 +186,20 @@
     <h2>Solved</h2>
     <div class="big" id="wTime">0:00</div>
     <p><span id="wMoves">0</span>수 · 표면이 계속 흔들리는 와중에 여섯 면을 맞췄습니다.</p>
-    <div class="reward">리워드 자리 — 준비 중</div>
+
+    <div class="spec">
+      <div class="frame"><img id="wShot" alt="맞춘 순간의 표면"></div>
+      <div class="code" id="wCode">&nbsp;</div>
+      <div class="note">이 표면은 다시 나오지 않습니다. 맞춘 자리에 그대로 멈춰 표본으로 남깁니다.</div>
+    </div>
+
+    <div class="rec">
+      <div>최고 기록<b id="wBest">—</b></div>
+      <div>최소 수<b id="wFewest">—</b></div>
+      <div>표본<b id="wCount">0</b></div>
+    </div>
+
+    <div class="shelf" id="wShelf"></div>
     <div class="row">
       <button id="bAgain" class="key">다시 섞기</button>
       <button id="bClose">닫기</button>
@@ -460,7 +496,7 @@ var VS = [
 var FS = [
 'precision highp float;',
 'varying vec3 vN; varying vec3 vT; varying vec3 vW; varying vec2 vUv; varying float vF; varying float vS;',
-'uniform vec3 uEye; uniform float uTime; uniform float uShim; uniform float uFlow; uniform float uTint;',
+'uniform vec3 uEye; uniform float uTime; uniform float uShim; uniform float uFlow; uniform float uTint; uniform float uBloom;',
 
 'float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453123); }',
 'float vnoise(vec2 p){',
@@ -580,7 +616,7 @@ var FS = [
 // Dispersion is therefore weighted by how hard the surface is bending here.
 '  vec3 silver = mix(vec3(dot(chrome, vec3(0.299,0.587,0.114))), chrome, 0.10) * 1.30;',
 '  float bend = clamp(length(vec2(h0-hx, h0-hy)) * 16.0, 0.0, 1.0);',
-'  float ir = (0.085 + 0.62*bend) * (0.62 + 0.52*uShim);',
+'  float ir = (0.085 + 0.62*bend) * (0.62 + 0.52*uShim) + uBloom * (0.09 + 0.62*bend);',
 '  vec3 col = silver * (1.0 + (slick - dot(slick, vec3(0.3333))) * ir * 2.3);',
 
 // identity cast — the one thing you can actually sort the cube by.
@@ -598,7 +634,7 @@ var FS = [
 '  col += mix(vec3(1.0), slick, 0.30) * pow(max(dot(Np,H2),0.0), 24.0) * 0.60;',
 
 // rim: prismatic edge catch
-'  col += mix(vec3(0.88,0.92,1.0), slick, 0.42) * fresP * (0.24 + 0.22*uShim);',
+'  col += mix(vec3(0.88,0.92,1.0), slick, 0.42) * fresP * (0.24 + 0.22*uShim + 0.40*uBloom);',
 '  col += vec3(0.34,0.40,0.54) * fres * 0.22;',
 
 // tone
@@ -847,6 +883,7 @@ var uTime = gl.getUniformLocation(prog,'uTime');
 var uShim = gl.getUniformLocation(prog,'uShim');
 var uFlow = gl.getUniformLocation(prog,'uFlow');
 var uTint = gl.getUniformLocation(prog,'uTint');
+var uBloom = gl.getUniformLocation(prog,'uBloom');
 
 var bufPos = gl.createBuffer(), bufNrm = gl.createBuffer(), bufTan = gl.createBuffer(), bufSta = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, bufSta); gl.bufferData(gl.ARRAY_BUFFER, aStatic, gl.STATIC_DRAW);
@@ -1027,7 +1064,7 @@ canvas.addEventListener('pointerdown', function(e){
   if(e.button!==0 && e.pointerType==='mouse') return;
   canvas.setPointerCapture(e.pointerId);
   canvas.classList.add('dragging');
-  els.win.classList.remove('on');
+  closeWin();
   var pt = ptr(e);
   if(!(e.pointerId in live)) nLive++;
   live[e.pointerId] = pt;
@@ -1111,6 +1148,9 @@ var moves = 0, scrambled = false, running = false, t0 = 0, elapsed = 0, active =
 var els = {
   tTime: document.getElementById('tTime'), tMoves: document.getElementById('tMoves'),
   win: document.getElementById('win'), wTime: document.getElementById('wTime'), wMoves: document.getElementById('wMoves'),
+  wShot: document.getElementById('wShot'), wCode: document.getElementById('wCode'),
+  wBest: document.getElementById('wBest'), wFewest: document.getElementById('wFewest'),
+  wCount: document.getElementById('wCount'), wShelf: document.getElementById('wShelf'),
   bUndo: document.getElementById('bUndo'), bRedo: document.getElementById('bRedo'),
   toast: document.getElementById('toast')
 };
@@ -1123,7 +1163,7 @@ function syncControls(){
 function bumpMove(){
   if(!active){                       // first move of a fresh run
     active = true; moves = 0; elapsed = 0;
-    els.win.classList.remove('on');
+    closeWin();
   }
   if(!running){ running = true; t0 = performance.now() - elapsed; }
   moves++; els.tMoves.textContent = moves;
@@ -1144,10 +1184,108 @@ function commitTurn(a){
   else if(scrambled){ onSolved(); }
 }
 
+// ════════════════════════════════════════════════════════════ reward
+// The surface is a function of one clock and never comes round again, so the
+// frame you solve on is the only one of its kind there will ever be. Solving
+// stops that clock and keeps the frame: a specimen, named after the moment it
+// was lifted from. The shelf holds the last few, and the fastest is marked.
+var SHELF_KEY = 'prismCube.shelf.v1', SHELF_MAX = 6;
+var frozen = false, freezeT = 0, bloom = 0, wantShot = null;
+
+function closeWin(){ els.win.classList.remove('on'); frozen = false; }
+
+// the clock names the specimen: same surface, same code, and no other
+function specimenCode(t, mv, ms){
+  var h = 2166136261, str = t.toFixed(4) + ':' + mv + ':' + ms;
+  for(var i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = (h * 16777619) >>> 0; }
+  var A = '0123456789ABCDEFGHJKLMNPRSTUVWXY';     // no I/O/Q/Z — reads cleanly
+  var out = '';
+  for(var k=0;k<4;k++){ out += A.charAt(h & 31); h >>>= 5; }
+  return 'PC-' + out;
+}
+
+// lift a square off the drawing buffer, centred on the cube rather than the
+// canvas — the camera keeps the cube clear of the controls, so those differ
+function captureSpecimen(){
+  var c = projectPt([0,0,0]);
+  var side = Math.round(Math.min(canvas.width, canvas.height) * 0.74);
+  var x = clamp(Math.round(c[0]*DPR - side/2), 0, Math.max(0, canvas.width - side));
+  var y = clamp(Math.round(canvas.height - c[1]*DPR - side/2), 0, Math.max(0, canvas.height - side));
+  var buf = new Uint8Array(side*side*4);
+  gl.readPixels(x, y, side, side, gl.RGBA, gl.UNSIGNED_BYTE, buf);
+  var tmp = document.createElement('canvas'); tmp.width = tmp.height = side;
+  var tc = tmp.getContext('2d');
+  var img = tc.createImageData(side, side);
+  for(var r=0; r<side; r++){                        // readPixels is bottom-up
+    var from = (side-1-r)*side*4;
+    img.data.set(buf.subarray(from, from + side*4), r*side*4);
+  }
+  tc.putImageData(img, 0, 0);
+  // 224 keeps the 112px specimen crisp on a 2x display and leaves the shelf
+  // something to crop into
+  var out = document.createElement('canvas'); out.width = out.height = 224;
+  var oc = out.getContext('2d');
+  oc.imageSmoothingEnabled = true; oc.imageSmoothingQuality = 'high';
+  oc.drawImage(tmp, 0, 0, 224, 224);
+  return out.toDataURL('image/jpeg', 0.74);
+}
+
+function readShelf(){
+  try{ var v = JSON.parse(localStorage.getItem(SHELF_KEY)); return Array.isArray(v) ? v : []; }
+  catch(e){ return []; }
+}
+function writeShelf(list){ try{ localStorage.setItem(SHELF_KEY, JSON.stringify(list)); }catch(e){} }
+
+function awardSpecimen(w){
+  var png = '';
+  try{ png = captureSpecimen(); }catch(e){}
+  var entry = { code: specimenCode(w.t, w.mv, w.ms), png: png, ms: w.ms, mv: w.mv, at: Date.now() };
+  var list = readShelf();
+  list.unshift(entry);
+  if(list.length > SHELF_MAX) list.length = SHELF_MAX;
+  writeShelf(list);
+  showReward(entry, list);
+}
+
+// built as nodes, not markup: the shelf comes back out of storage, and storage
+// is not a place to trust a string from
+function showReward(entry, list){
+  els.wCode.textContent = entry.code;
+  if(entry.png){ els.wShot.src = entry.png; els.wShot.classList.add('on'); }
+  var best = Infinity, fewest = Infinity;
+  for(var i=0;i<list.length;i++){
+    if(list[i].ms < best) best = list[i].ms;
+    if(list[i].mv < fewest) fewest = list[i].mv;
+  }
+  els.wBest.textContent   = isFinite(best)   ? fmt(best)      : '—';
+  els.wFewest.textContent = isFinite(fewest) ? fewest + '수'  : '—';
+  els.wCount.textContent  = list.length;
+
+  while(els.wShelf.firstChild) els.wShelf.removeChild(els.wShelf.firstChild);
+  for(var k=0;k<list.length;k++){
+    var e = list[k];
+    var fig = document.createElement('figure');
+    if(e.ms === best) fig.className = 'best';
+    fig.title = e.code;
+    var tile = document.createElement('div'); tile.className = 'tile';
+    var im = document.createElement('img');
+    if(typeof e.png === 'string' && e.png.indexOf('data:image/') === 0) im.src = e.png;
+    im.alt = e.code;
+    tile.appendChild(im);
+    var cap = document.createElement('figcaption');
+    cap.textContent = fmt(e.ms);
+    fig.appendChild(tile); fig.appendChild(cap);
+    els.wShelf.appendChild(fig);
+  }
+}
+
 function onSolved(){
   running = false; active = false; scrambled = false;
+  frozen = true; freezeT = 0;                 // hold the surface it came together on
   els.wTime.textContent = fmt(elapsed);
   els.wMoves.textContent = moves;
+  els.wShot.classList.remove('on'); els.wCode.innerHTML = '&nbsp;';
+  wantShot = { ms: elapsed, mv: moves, t: clock };
   els.win.classList.add('on');
 }
 
@@ -1164,7 +1302,7 @@ function toast(msg){
 }
 
 function scramble(){
-  els.win.classList.remove('on');
+  closeWin();
   history.length = 0; queue.length = 0; future.length = 0; pending.length = 0; anim = null;
   buildCubies();
   var last = -1, seq = [];
@@ -1185,7 +1323,7 @@ function scramble(){
 }
 
 function reset(){
-  els.win.classList.remove('on');
+  closeWin();
   history.length = 0; queue.length = 0; future.length = 0; pending.length = 0; anim = null;
   buildCubies();
   moves = 0; elapsed = 0; running = false; scrambled = false; active = false;
@@ -1239,7 +1377,7 @@ window.addEventListener('keydown', function(e){
   if(k===' '){ e.preventDefault(); scramble(); return; }
   if(k==='z'){ e.preventDefault(); (e.shiftKey ? redo : undo)(); return; }
   if(k==='y'){ e.preventDefault(); redo(); return; }
-  if(k==='escape'){ els.win.classList.remove('on'); return; }
+  if(k==='escape'){ closeWin(); return; }
   if(KEYMAP[k]){
     e.preventDefault();
     var m = KEYMAP[k];
@@ -1259,7 +1397,7 @@ document.getElementById('bUndo').onclick = undo;
 document.getElementById('bRedo').onclick = redo;
 document.getElementById('bView').onclick = function(){ viewT.yaw = -0.62; viewT.pitch = 0.52; zoomT = ZOOM_START; };
 document.getElementById('bAgain').onclick = function(){ scramble(); };
-document.getElementById('bClose').onclick = function(){ els.win.classList.remove('on'); };
+document.getElementById('bClose').onclick = closeWin;
 
 canvas.addEventListener('wheel', function(e){
   e.preventDefault();
@@ -1273,11 +1411,18 @@ canvas.addEventListener('contextmenu', function(e){ e.preventDefault(); });
 
 // ════════════════════════════════════════════════════════════ loop
 var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-var last = performance.now(), clock = 0;
+var last = performance.now(), clock = 0, decoClock = 0;
 
 function frame(now){
   var dt = Math.min(64, now - last); last = now;
-  if(!reduce) clock += dt/1000;
+  if(frozen) freezeT += dt;
+  // the surface eases to a stop rather than snapping, and the prism swells once
+  var hold = frozen ? Math.max(0, 1 - freezeT/700) : 1;
+  if(!reduce){
+    decoClock += dt/1000;                      // the background keeps swimming
+    clock += (dt/1000) * hold * hold;
+  }
+  bloom = (frozen && !reduce) ? Math.sin(Math.PI * Math.min(1, freezeT/900)) : 0;
 
   if(anim){
     anim.t += dt;
@@ -1325,11 +1470,12 @@ function frame(now){
   gl.uniform1f(uShim, SHIM);
   gl.uniform1f(uFlow, FLOW);
   gl.uniform1f(uTint, TINT);
+  gl.uniform1f(uBloom, bloom);
   gl.drawArrays(gl.TRIANGLES, 0, NVERT);
 
   // decoration last: depth-tested against the cube so it can pass behind it,
   // depth writes off and sorted far-to-near so the alpha composites cleanly
-  updateDeco(clock);
+  updateDeco(decoClock);
   gl.bindBuffer(gl.ARRAY_BUFFER, dBufP);
   gl.bufferSubData(gl.ARRAY_BUFFER, 0, dPos);
   gl.useProgram(shProg);
@@ -1345,6 +1491,13 @@ function frame(now){
   gl.enable(gl.CULL_FACE);
   gl.disable(gl.BLEND);
   unbindDeco();
+
+  // the specimen is lifted after the surface settles, so what is kept is
+  // exactly what the cube is holding
+  if(wantShot && freezeT >= (reduce ? 0 : 700)){
+    var w = wantShot; wantShot = null;
+    awardSpecimen(w);
+  }
 
   requestAnimationFrame(frame);
 }
@@ -1363,6 +1516,8 @@ if(/[?&]debug/.test(location.search)){
     center: function(){ cyFrac = 0; },      // for stills shot with the HUD hidden
     deco: function(){ return DECO.map(function(D){ return { p:D.p.slice(), follow:+D.follow.toFixed(4), z:+D.depth.toFixed(3) }; }); },
     orbit: function(y,pi){ viewT.yaw = y; viewT.pitch = pi; },
+    reward: function(){ return { frozen:frozen, freezeT:Math.round(freezeT), pending:!!wantShot,
+                                 bloom:+bloom.toFixed(3), clock:+clock.toFixed(3) }; },
     flags: function(){ return { scrambled:scrambled, active:active, moves:moves, anim:!!anim }; }
   };
 }
